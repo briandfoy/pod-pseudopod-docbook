@@ -21,6 +21,8 @@ sub transform_file
 	ok( -e $file, "Input file is there" );
 	
 	$parser->no_whining( ! ( $ENV{DEBUG} || 0 ) );
+	$parser->set_title( 'test-title' );
+	$parser->set_chapter( 3 );
 	$parser->complain_stderr( 1 );
 	$parser->output_string( \my $output );
 	$parser->parse_file( $file );
@@ -37,7 +39,7 @@ sub transform_file
 		{
 		open my( $fh ), ">", "$output_reference.debug"
 			or die "Could not open debug file: $!\n";
-		print $fh "\n$output\n"
+		print $fh "$output\n"
 		}
 	}
 	

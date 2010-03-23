@@ -14,11 +14,11 @@ $VERSION = '0.10';
 
 =head1 NAME
 
-Pod::WordML - Turn Pod into Microsoft Word's WordML
+Pod::DocBook - Turn Pod into Microsoft Word's WordML
 
 =head1 SYNOPSIS
 
-	use Pod::WordML;
+	use Pod::DocBook;
 
 =head1 DESCRIPTION
 
@@ -88,7 +88,13 @@ sub clear_scratch
 	$self->{scratch} = '';
 	}
 
-sub chapter_id { 1 }
+sub set_title   {  $_[0]->{title} = $_[1] }
+sub set_chapter {  $_[0]->{chapter} = $_[1] }
+
+sub title      { $_[0]->{title}      }
+sub chapter    { $_[0]->{chapter}    }
+sub section    { $_[0]->{section}    }
+sub subsection { $_[0]->{subsection} }
 
 sub document_header  
 	{
@@ -98,7 +104,7 @@ sub document_header
 	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 XML
 
-	my $id = $_[0]->chapter_id;
+	my $id = join '-', $_[0]->title, $_[0]->chapter;
 
 	$string .= <<"XML";
 <chapter id="$id">
@@ -170,10 +176,7 @@ sub _header_start
 	my( $self, $level ) = @_;
 
 	if( $level )
-		{
-		print STDERR "Level is $level\n";
-		print STDERR "Sections are @{ $self->{in_section} }\n";
-		
+		{		
 		LEVEL: {
 			if( @{ $self->{in_section} } and $self->{in_section}[0] >= $level )
 				{
@@ -183,8 +186,13 @@ sub _header_start
 				}
 			last LEVEL;
 			}			
-	
-		my $id = 'foo';
+		
+		my @parts = qw(title chapter section);
+		push @parts, 'subsection' if $level > 1;
+		
+		@parts = map { $self->$_() } @parts;
+		
+		my $id = join '-', @parts;
 		my $tag = qq|\n<sect$level id="$id">\n|;
 	
 		$self->add_xml_tag( $tag );
@@ -204,11 +212,20 @@ sub _header_end
 sub start_head0     { $_[0]->_header_start( 0 ); }
 sub end_head0       { $_[0]->_header_end( 0 );   }
 	
-sub start_head1     { $_[0]->_header_start( 1 ); }
 sub end_head1       { $_[0]->_header_end( 1 );   }
+sub start_head1     { 
+	$_[0]->{section}++;
+	$_[0]->{subsection} = 0;
 
-sub start_head2     { $_[0]->_header_start( 2 ); }
+	$_[0]->_header_start( 1 ); 
+	}
+
 sub end_head2       { $_[0]->_header_end( 2 );   }
+sub start_head2     {
+	$_[0]->{subsection}++;
+
+	$_[0]->_header_start( 2 ); 
+	}
 
 sub start_head3     { $_[0]->_header_start( 3 ); }
 sub end_head3       { $_[0]->_header_end( 3 );   }
@@ -344,10 +361,10 @@ sub end_over_block  { not_implemented() }
 sub end_over_number { not_implemented() }
 
 
-sub end_B   { $_[0]->add_xml_tag( '</literal>' ); $_[0]->{in_B} = 0; }
+sub end_B   { $_[0]->add_xml_tag( '</emphasis>' ); $_[0]->{in_B} = 0; }
 sub start_B  
 	{	
-	$_[0]->add_xml_tag( '<literal moreinfo="none">' ); 
+	$_[0]->add_xml_tag( '<emphasis>' ); 
 	$_[0]->{in_B} = 1;
 	}
 
@@ -367,8 +384,8 @@ sub start_I { $_[0]->add_xml_tag( '<emphasize>' )  }
 
 =cut
 
-sub end_C   { $_[0]->add_xml_tag( '</filename>' ); $_[0]->{in_C} = 0; }
-sub start_C { $_[0]->add_xml_tag( '<filename>' ); $_[0]->{in_C} = 1; }
+sub end_F   { $_[0]->add_xml_tag( '</filename>' ); $_[0]->{in_C} = 0; }
+sub start_F { $_[0]->add_xml_tag( '<filename>' ); $_[0]->{in_C} = 1; }
 
 sub start_M
 	{	
