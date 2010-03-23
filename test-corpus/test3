@@ -1,0 +1,17 @@
+#!perl
+
+use Storable qw(dclone);
+
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my @original = ( $buster, qw( Ginger Mimi Ella ) );
+
+my $copy     = dclone \@original;
+
+$copy->[0]{name} = 'Roscoe';
+
+printf "In \@original, the first cat's name is %s\n", $original[0]->{name};
+printf "In \@copy, the first cat's name is %s\n", $copy->[0]{name};
+

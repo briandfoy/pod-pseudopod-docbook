@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<chapter id="intermediateperl-CHP-1">
+    <title>Introduction</title>
+
+    <para>Welcome to the next step in your understanding of Perl. You’re
+    probably here either because you want to learn to write programs that are
+    more than 100 lines long or because your boss has told you to do
+    so.</para>
+
+    <para>See, our <emphasis>Learning Perl</emphasis> book was great because
+    it introduced the use of Perl for short and medium programs (which is most
+    of the programming done in Perl, we’ve observed). But, to avoid having
+    “the Llama book” be big and intimidating, we left a lot of information
+    out, deliberately and carefully.</para>
+
+    <para>In the pages that follow, you can get “the rest of the story” in the
+    same style as our friendly Llama book. It covers what you need to write
+    programs that are 100 to 10,000 lines long.</para>
+
+    <para>For example, you’ll learn how to work with multiple programmers on
+    the same project. This is great, because unless you work 35 hours each
+    day, you’ll need some help with larger tasks. You’ll also need to ensure
+    that all your code fits with the other code as you develop it for the
+    final application.</para>
+
+    <para>This book will also show you how to deal with larger and more
+    complex data structures<indexterm class="singular" id="IDX-CHP-1-0009" significance="normal">
+        <primary>complex data structures</primary>
+      </indexterm> , such as what we might casually call a “hash of hashes” or
+    an “array of arrays of hashes of arrays.” Once you know a little about
+    references, you’re on your way to arbitrarily complex data
+    structures.</para>
+
+    <para>And then there’s the buzzworthy notion of object-oriented
+    programming (OOP), which allows parts of your code (or hopefully code from
+    others) to be reused with minor or major variations within the same
+    program. The book will cover that as well, even if you’ve never seen
+    objects before.</para>
+
+    <para>An important aspect of working in teams is having a release
+    cycle<indexterm class="singular" id="IDX-CHP-1-0010" significance="normal">
+        <primary>release cycle</primary>
+      </indexterm> and tests for unit and integration testing<indexterm class="singular" id="IDX-CHP-1-0011" significance="normal">
+        <primary>testing</primary>
+      </indexterm> . You’ll learn the basics of packaging your code as a
+    distribution and providing unit tests for that distribution, both for
+    development and for verifying that your code works in the ultimate end
+    environment.</para>
+
+    <para>And, just as was promised and delivered in <emphasis>Learning
+    Perl</emphasis>, we’ll entertain you along the way with interesting
+    examples and bad puns. (We’ve sent Fred, Barney, Betty, and Wilma home,
+    though. A new cast of characters will take the starring roles.)</para>
+
+    <sect1 id="intermediateperl-CHP-1-SECT-1">
+      <title>What Should You Know Already?</title>
+
+      <para><indexterm class="singular" id="IDX-CHP-1-0012" significance="normal">
+          <primary>exercises</primary>
+
+          <secondary>using</secondary>
+        </indexterm>We’ll presume that you’ve already read <emphasis>Learning
+      Perl</emphasis>, or at least pretend you have, and that you’ve played
+      enough with Perl to already have those basics down. For example, you
+      won’t see an explanation in this book that shows how to access the
+      elements of an array or return a value from a subroutine.</para>
+
+      <para>Make sure you know the following things:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>How to run a Perl program on your system</para>
+        </listitem>
+
+        <listitem>
+          <para>The three basic Perl variable types: scalars, arrays, and
+          hashes</para>
+        </listitem>
+
+        <listitem>
+          <para>Control structures such as <literal moreinfo="none">while</literal>, <literal moreinfo="none">if</literal>, <literal moreinfo="none">for</literal>, and <literal moreinfo="none">foreach</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>Subroutines</para>
+        </listitem>
+
+        <listitem>
+          <para>Perl operators such as <literal moreinfo="none">grep</literal>, <literal moreinfo="none">map</literal>, <literal moreinfo="none">sort</literal>, and <literal moreinfo="none">print</literal></para>
+        </listitem>
+
+        <listitem>
+          <para>File manipulation such as <literal moreinfo="none">open</literal>, file reading, and <literal moreinfo="none">-X</literal> (file tests)</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>You might pick up deeper insight into these topics in this book,
+      but we’re going to presume you know the basics.</para>
+    </sect1>
+
+    <sect1 id="intermediateperl-CHP-1-SECT-2">
+      <title>What About All Those Footnotes?</title>
+
+      <para>Like <emphasis>Learning Perl</emphasis>, this book relegates some
+      of the more esoteric items out of the way for the first reading and
+      places those items in footnotes.<footnote id="intermediateperl-CHP-1-FN1">
+          <para>Like this.</para>
+        </footnote> You should skip those the first time through and pick them
+      up on a rereading. You will not find anything in a footnote that you’ll
+      need to understand any of the material we present later.</para>
+    </sect1>
+
+    <sect1 id="intermediateperl-CHP-1-SECT-3">
+      <title>What’s with the Exercises?</title>
+
+      <para>Hands-on training gets the job done better. The best way to
+      provide this training is with a series of exercises after every
+      half-hour to hour of presentation. Of course, if you’re a speed reader,
+      the end of the chapter may come a bit sooner than a half hour. Slow
+      down, take a breather, and do the exercises!</para>
+
+      <para>Each exercise has a “minutes to complete” rating. We intend for
+      this rating to hit the midpoint of the bell curve, but don’t feel bad if
+      you take significantly longer or shorter. Sometimes it’s just a matter
+      of how many times you’ve faced similar programming tasks in your studies
+      or jobs. Use the numbers merely as a guideline.</para>
+
+      <para>Every exercise has its answer in the Appendix. Again, try not to
+      peek; you’ll ruin the value of the exercise.</para>
+    </sect1>
+
+    <sect1 id="intermediateperl-CHP-1-SECT-4">
+      <title>What If I’m a Perl Course Instructor?</title>
+
+      <para>If you’re a Perl instructor who has decided to use this as your
+      textbook, you should know that each set of exercises is short enough for
+      most students to complete in 45 minutes to an hour, with a little time
+      left over for a break. Some chapters’ exercises should be quicker, and
+      some may take longer. That’s because once all those little numbers in
+      square brackets were written, we discovered that we didn’t know how to
+      add.</para>
+
+      <para>So let’s get started. Class begins after you turn the page . . .
+      .</para>
+    </sect1>
+  </chapter>

@@ -1,0 +1,26 @@
+#!perl
+
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my @original = ( $buster, qw( Ginger Mimi Ella ) );
+
+my @copy     = @original;
+
+$copy[0]->{name} = 'Roscoe';
+
+printf "In \@original, the first cat's name is %s\n", $original[0]->{name};
+printf "In \@copy, the first cat's name is %s\n", $copy[0]->{name};
+
+BEGIN {
+package Cat;
+
+sub new {
+	my( $class, %hash ) = @_;
+	bless \%hash, $class;
+	}
+	
+sub set_name { $_[0]->{name} = $_[1] }
+sub get_name { $_[0]->{name} }
+}

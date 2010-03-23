@@ -1,0 +1,4 @@
+$/ = 'abc';
+my $test = "test/\n";
+$test =~ s|/\z||;
+print $test;

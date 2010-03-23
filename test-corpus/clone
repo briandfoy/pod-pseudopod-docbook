@@ -1,0 +1,216 @@
+<p>
+When you want to make a copy of a hash or an array, it's not enough to merely assign it to a new variable name, at least in the general case:
+</p>
+
+<pre class="brush:perl">
+my @copy = @original;
+</pre>
+
+<p>
+This is a bad habit that new Perl programmers pick up because they are only dealing with <i>flat array</i>: that is, every value is a simple scalar, so they never see the problem:
+</p>
+
+<pre class="brush:perl">
+my @original = qw( Buster Ginger Mimi Ella );
+
+my @copy     = @original;
+</pre>
+
+<p>
+If you know that you have only a flat array, that's not a problem. However, the experienced programmer knows that "you know" is often the source of misguided assumptions that blow up later.
+</p>
+<p>
+At the <A href=http://oreilly.com/catalog/9780596520113"">Learning Perl</a> level, we conveniently skirt the issue because we don't talk about references until <a href="http://oreilly.com/catalog/9780596102067">Intermediate Perl</a>. That's right: blame me.
+</p>
+<p>
+Consider the case where one of the array elements is a reference. As long as you don't change the values, you don't see the problem:
+</p>
+
+<pre class="brush:perl">
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my @original = ( $buster, qw( Ginger Mimi Ella ) );
+
+my @copy     = @original;
+
+
+printf "In \@original, the first cat's name is %s\n", $original[0]->{name};
+printf "In \@copy, the first cat's name is %s\n", $copy[0]->{name};
+</pre>
+
+<p>
+The output doesn't show anything out of place:
+</p>
+
+<pre class="brush:plain">
+In @original, the first cat's name is Buster
+In @copy, the first cat's name is Buster
+</pre>
+
+<p>
+Now change one of the values in <code>@copy</code>:
+</p>
+
+<pre class="brush:perl">
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my @original = ( $buster, qw( Ginger Mimi Ella ) );
+
+my @copy     = @original;
+
+$copy[0]->{name} = 'Roscoe';
+
+printf "In \@original, the first cat's name is %s\n", $original[0]->{name};
+printf "In \@copy, the first cat's name is %s\n", $copy[0]->{name};
+</pre>
+
+<p>
+The output now shows both arrays were affected even though you only wanted to change <code>@copy</code>:
+</p>
+
+<pre class="brush:plain">
+In @original, the first cat's name is Roscoe
+In @copy, the first cat's name is Roscoe
+</pre>
+
+<p>
+Instead of an assignment, which is the source of your problem, make a <i>deep copy</i>. There are several ways that you can do this. The <code>dclone</code>
+function (for <bold>d<bold>eep clone) from <a href="http://search.cpan.org/dist/Storable/">Storable</a> (part of the Standard Library) can do it for you:
+</p>
+
+<pre class="brush:plain">
+use Storable qw(dclone);
+
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my @original = ( $buster, qw( Ginger Mimi Ella ) );
+
+my $copy     = dclone \@original;
+
+$copy->[0]{name} = 'Roscoe';
+
+printf "In \@original, the first cat's name is %s\n", $original[0]->{name};
+printf "In \@copy, the first cat's name is %s\n", $copy->[0]{name};
+</pre>
+
+<p>
+Now the output shows that the two arrays remained distinct:
+</p>
+
+<pre class="brush:plain">
+In @original, the first cat's name is Buster
+In @copy, the first cat's name is Roscoe
+</pre>
+
+<p>
+You had to make one subtle change to your program, however. <code>dclone</code> takes a reference and returns a reference, so you didn't copy <code>@original</code> to another array variable. That's not very nice. You could copy the de-referenced value:
+</p>
+
+<pre class="brush:plain">
+my @copy     = @{ dclone \@original };
+</pre>
+
+<p>
+That's not very pretty either. You could hide that in a subroutine, but the easiest thing is to just give over to references and use them everywhere from the start (but that's another Item for another time):
+</p>
+
+<pre class="brush:plain">
+use Storable qw(dclone);
+
+my $buster      = { 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	};
+my $original = [ $buster, qw( Ginger Mimi Ella ) ];
+
+my $copy     = dclone $original;
+
+$copy->[0]{name} = 'Roscoe';
+
+printf "In \$original, the first cat's name is %s\n", $original->[0]{name};
+printf "In \$copy, the first cat's name is %s\n", $copy->[0]{name};
+</pre>
+
+<p>
+Set aside the issue named variables to consider a more common case where that reference element in your array is an object. Here's the simple class that implements a simple Cat:
+</p>
+
+<pre>
+BEGIN {
+package Cat;
+
+sub new {
+	my( $class, %hash ) = @_;
+	bless \%hash, $class;
+	}
+	
+sub set_name { $_[0]->{name} = $_[1] }
+sub get_name { $_[0]->{name} }
+}
+</pre>
+
+<p>
+Converting your previous problematic program to use <code>Cat</code>, you have:
+</p>
+
+<pre class="brush:perl">
+my $buster      = Cat->new( 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	);
+my $original = [ $buster, qw( Ginger Mimi Ella ) ];
+
+my $copy     = $original;
+
+$copy->[0]->set_name( 'Roscoe' );
+
+printf "In \$original, the first cat's name is %s\n", $original->[0]->get_name;
+printf "In \$copy, the first cat's name is %s\n", $copy->[0]->get_name;
+</pre>
+
+<p>
+Again, the output shows that you changed "both" objects:
+</p>
+
+<pre class="brush:plain">
+In $original, the first cat's name is Roscoe
+In $copy, the first cat's name is Roscoe
+</pre>
+
+<p>
+Using <code>dclone</code> solves the problem:
+</p>
+
+<pre class="brush:perl">
+my $buster      = Cat->new( 
+	name => 'Buster', 
+	colors => [ qw(black white) ] 
+	);
+my $original = [ $buster, qw( Ginger Mimi Ella ) ];
+
+my $copy     = dclone $original;
+
+$copy->[0]->set_name( 'Roscoe' );
+
+printf "In \$original, the first cat's name is %s\n", $original->[0]->get_name;
+printf "In \$copy, the first cat's name is %s\n", $copy->[0]->get_name;
+</pre>
+
+<p>
+Now you have two separate objects:
+</p>
+
+<pre class="brush:plain">
+In $original, the first cat's name is Buster
+In $copy, the first cat's name is Roscoe
+</pre>
+
+<p>
+There's an additional problem here though. Simply cloning an object might not be the right thing. What if the object has database connections, open filehandles, or other bits that should be properly re-initialized? What if the object is actually a singleton, so you end up with a copy anyway? You can add a <code>clone</code> method to your class to handle that, and we'll cover that in a later Item.
+</p>
