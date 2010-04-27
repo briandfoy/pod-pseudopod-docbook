@@ -9,12 +9,12 @@
 
 <sect1 id="test-title-3-1">
 <title>This is head1</title>
-<para>This is a para with a <literal moreinfo="none">single code</literal> and a <literal moreinfo="none">&lt;$fh></literal>.</para>
+<para>This is a para with a <literal moreinfo="none">single code</literal> and a <literal moreinfo="none"><$fh></literal>.</para>
 
 <sect2 id="test-title-3-1-1">
 <title>This is the first head2</title>
 <para>This is a para with a <emphasis>bold</emphasis> word.</para>
-<programlisting format="linespecific" id="I_programlisting3_tt28" xml:space="preserve">#!/usr/bin/perl
+<programlisting format="linespecific" id="I_programlisting3_tt1" xml:space="preserve">#!/usr/bin/perl
 use strict;
 use warnings;
 

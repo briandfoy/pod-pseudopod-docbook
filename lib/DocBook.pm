@@ -255,8 +255,6 @@ sub start_Para
 	my $self = shift;
 	
 	$self->add_xml_tag( qq|<para>| );
-	
-	$self->add_to_scratch( "\x{25FE} " ) if $self->{in_item};
 		
 	$self->escape_and_emit;
 	
@@ -281,7 +279,10 @@ sub end_figure      { }
 sub start_Verbatim 
 	{ 
 	$_[0]{'in_verbatim'} = 1;
-	$_[0]->add_xml_tag( '<programlisting format="linespecific" id="I_programlisting3_tt28" xml:space="preserve">' );
+	my $sequence = ++$_[0]{'verbatim_sequence'};
+	my $chapter  = $_[0]->chapter;
+	
+	$_[0]->add_xml_tag( qq|<programlisting format="linespecific" id="I_programlisting${chapter}_tt${sequence}" xml:space="preserve">| );
 	$_[0]->emit;
 	}
 
@@ -309,7 +310,6 @@ sub _get_initial_item_type
 
 sub not_implemented { croak "Not implemented! " . (caller(1))[3] }
 
-sub bullet_item_style { 'bullet item' }
 sub start_item_bullet 
 	{
 	my( $self ) = @_;
@@ -317,48 +317,52 @@ sub start_item_bullet
 	$self->{in_item} = 1;
 	$self->{item_count}++;
 	
+	$self->add_to_scratch( "<listitem>\n" );
 	$self->start_Para;
 	}
 
-sub start_item_number { not_implemented() }
-sub start_item_block  { not_implemented() }
-sub start_item_text   { not_implemented() }
+sub start_item_number { $_[0]->add_to_scratch( '<listitem>' ) }
+sub start_item_block  { $_[0]->add_to_scratch( '<listitem>' ) }
+sub start_item_text   { $_[0]->add_to_scratch( '<listitem>' ) }
 
 sub end_item_bullet
 	{ 	
 	my $self = shift;
 	$self->end_Para;
+	$self->add_to_scratch( "</listitem>\n\n" );
 	$self->{in_item} = 0;
 	}	
-sub end_item_number { not_implemented() }
-sub end_item_block  { not_implemented() }
-sub end_item_text   { not_implemented() }
+sub end_item_number { $_[0]->add_to_scratch( '</listitem>' ) }
+sub end_item_block  { $_[0]->add_to_scratch( '</listitem>' ) }
+sub end_item_text   { $_[0]->add_to_scratch( '</listitem>' ) }
 
 sub start_over_bullet
 	{ 
 	my $self = shift;
+	$self->add_to_scratch( "\n<itemizedlist>\n" );
 
 	$self->{in_item_list} = 1;
 	$self->{item_count}   = 0;
 	}
-sub start_over_text   { not_implemented() }
-sub start_over_block  { not_implemented() }
-sub start_over_number { not_implemented() }
+sub start_over_text   { $_[0]->add_to_scratch( '<itemizedlist>' ) }
+sub start_over_block  { $_[0]->add_to_scratch( '<itemizedlist>' ) }
+sub start_over_number { $_[0]->add_to_scratch( '<itemizedlist>' ) }
 
 sub end_over_bullet 
 	{	
 	my $self = shift;
 	
-	$self->end_non_code_text;
-	
 	$self->{in_item_list} = 0;	
 	$self->{item_count}   = 0;
 	$self->{last_thingy}  = 'item_list';
-	$self->{scratch}      = '';
+	$self->end_non_code_text;
+	$self->add_to_scratch( "</itemizedlist>\n\n" );
+	$self->emit;
+	$self->clear_scratch;
 	}
-sub end_over_text   { not_implemented() }
-sub end_over_block  { not_implemented() }
-sub end_over_number { not_implemented() }
+sub end_over_text   { $_[0]->add_to_scratch( '</itemizedlist>' ) }
+sub end_over_block  { $_[0]->add_to_scratch( '</itemizedlist>' ) }
+sub end_over_number { $_[0]->add_to_scratch( '</itemizedlist>' ) }
 
 
 sub end_B   { $_[0]->add_xml_tag( '</emphasis>' ); $_[0]->{in_B} = 0; }
@@ -371,8 +375,8 @@ sub start_B
 sub end_C   { $_[0]->add_xml_tag( '</literal>' ); $_[0]->{in_C} = 0; }
 sub start_C { $_[0]->add_xml_tag( '<literal moreinfo="none">' ); $_[0]->{in_C} = 1; }
 	
-sub end_I   { $_[0]->add_xml_tag( '</emphasize>' ) }
-sub start_I { $_[0]->add_xml_tag( '<emphasize>' )  }
+sub end_I   { $_[0]->add_xml_tag( '</emphasis>' ) }
+sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
 
 =pod
 
@@ -412,7 +416,7 @@ sub handle_text
 
 	my $pad = $self->get_pad;
 		
-	$self->escape_text( \$text );
+	#$self->escape_text( \$text );
 	$self->{$pad} .= $text;
 	
 	unless( $self->dont_escape )
