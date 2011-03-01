@@ -10,7 +10,7 @@ This is a para with a C<single code> and a C<< <$fh> >>.
 
 =head2 This is the first head2
 
-This is a para with a B<bold> word.
+This is a para with a B<bold> word. And an I<italic> word.
 
 	#!/usr/bin/perl
 	use strict;
@@ -20,7 +20,9 @@ This is a para with a B<bold> word.
 	
 	unlink $file;
 	
-This is after the code.
+This is after the code. This line has some "double quotes" and the next
+line has some 'single quotes'. There is also an 
+mdash--there it is!F<This is the first footnote.>
 
 =head2 This is the second head2
 
@@ -29,5 +31,28 @@ This is a para.
 =head1 This is another head1
 
 This is the last line.
+
+=over 4
+
+=item * This is an item
+
+=item * This is an item 2
+
+=back
+
+Now for a list with paras in it.
+
+=over 4
+
+=item * This is an item with a para
+
+No we are in a para in a listF<This is the second footnote.>.
+
+=item * This is an item 2
+
+No we are in a para in a listF<This is the third footnote.>.
+
+=back
+
 
 =cut

@@ -13,7 +13,7 @@
 
 <sect2 id="test-title-3-1-1">
 <title>This is the first head2</title>
-<para>This is a para with a <emphasis>bold</emphasis> word.</para>
+<para>This is a para with a <emphasis role="bold">bold</emphasis> word. And an <emphasis>italic</emphasis> word.</para>
 <programlisting format="linespecific" id="I_programlisting3_tt1" xml:space="preserve">#!/usr/bin/perl
 use strict;
 use warnings;
@@ -21,7 +21,7 @@ use warnings;
 use Some::Module;
 
 unlink $file;</programlisting>
-<para>This is after the code.</para>
+<para>This is after the code. This line has some &#x201C;double quotes&#x201D; and the next line has some &#x2019;single quotes&#x2019;. There is also an mdash&#x2014;there it is!<footnote id="test-title-0">This is the first footnote.</footnote></para>
 </sect2>
 
 <sect2 id="test-title-3-1-2">
@@ -33,6 +33,35 @@ unlink $file;</programlisting>
 <sect1 id="test-title-3-2">
 <title>This is another head1</title>
 <para>This is the last line.</para>
+
+<itemizedlist>
+
+<listitem>
+<para>This is an item</para>
+</listitem>
+
+<listitem>
+<para>This is an item 2</para>
+</listitem>
+
+</itemizedlist>
+
+<para>Now for a list with paras in it.</para>
+
+<itemizedlist>
+
+<listitem>
+<para>This is an item with a para</para>
+<para>No we are in a para in a list<footnote id="test-title-1">This is the second footnote.</footnote>.</para>
+</listitem>
+
+<listitem>
+<para>This is an item 2</para>
+<para>No we are in a para in a list<footnote id="test-title-2">This is the third footnote.</footnote>.</para>
+</listitem>
+
+</itemizedlist>
+
 </sect1>
 </chapter>
 
