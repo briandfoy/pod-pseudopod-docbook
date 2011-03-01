@@ -5,7 +5,7 @@ require 5.008;
 eval "use Test::Manifest 1.14";
 
 WriteMakefile(
-	'NAME'	       => 'Pod::DocBook',
+	'NAME'	       => 'Pod::PseudoPod::DocBook',
 	'ABSTRACT'     => 'This is what the module does',
 	'VERSION_FROM' => 'lib/DocBook.pm',
 	'LICENSE'      => 'perl',
@@ -20,7 +20,7 @@ WriteMakefile(
 		},
 
 	'MAN3PODS'     => {
-		'lib/DocBook.pm' => '$(INST_MAN3DIR)/Pod::DocBook.3',
+		'lib/DocBook.pm' => '$(INST_MAN3DIR)/Pod::PseudoPod::DocBook.3',
 		},
 
 	clean  => { FILES    => q|Pod-DocBook-*| },
