@@ -1,4 +1,4 @@
-package Pod::DocBook;
+package Pod::PseudoPod::DocBook;
 use strict;
 use base 'Pod::PseudoPod';
 
@@ -12,9 +12,11 @@ use Carp;
 
 $VERSION = '0.10';
 
+sub DEBUG () { 0 }
+
 =head1 NAME
 
-Pod::DocBook - Turn Pod into Microsoft Word's WordML
+Pod::PseudoPod::DocBook - Turn Pod into DocBook
 
 =head1 SYNOPSIS
 
@@ -78,7 +80,7 @@ sub add_to_scratch
 	{
 	my( $self, $stuff ) = @_;
 
-	$self->{scratch} .= $stuff;
+	$self->{'scratch'} .= $stuff;
 	}
 
 sub clear_scratch 
@@ -98,16 +100,24 @@ sub subsection { $_[0]->{subsection} }
 
 sub document_header  
 	{
-	my $string = <<'XML';
+	my $string = <<"XML";
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" 
 	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!-- created by brian's private converter @{ [ scalar localtime ] } -->
 XML
 
 	my $id = join '-', $_[0]->title, $_[0]->chapter;
 
+	my $filename = $_[0]->{source_filename};
+	$_[0]->{root_tag} = do {
+		    if( $filename =~ /app/ ) { 'appendix' }
+		elsif( $filename =~ /ch00/ ) { 'preface'  }
+		else                         { 'chapter'  }
+		};
+
 	$string .= <<"XML";
-<chapter id="$id">
+<$_[0]->{root_tag} id="$id">
 
 XML
 	}
@@ -125,8 +135,8 @@ sub document_footer
 		$string .= "</sect$section>\n";
 		}
 
-	$string .= <<'XML';
-</chapter>
+	$string .= <<"XML";
+</$_[0]->{root_tag}>
 XML
 	}
 
@@ -139,7 +149,11 @@ Everything else is the same stuff from C<Pod::Simple>.
 =cut
 
 use Data::Dumper;
-sub new { my $self = $_[0]->SUPER::new() }
+sub new { 
+	my $self = $_[0]->SUPER::new();
+	$self->{accept_targets}{table}++;
+	$self;
+	}
 
 sub emit 
 	{
@@ -152,10 +166,10 @@ sub get_pad
 	{
 	# flow elements first
 	   if( $_[0]{module_flag}   ) { 'scratch'   }
-	elsif( $_[0]{url_flag}      ) { 'url_text'      }
+	elsif( $_[0]{url_flag}      ) { 'url_text'  }
 	# then block elements
 	# finally the default
-	else                          { 'scratch'       }
+	else                          { 'scratch'   }
 	}
 
 sub start_Document
@@ -175,10 +189,11 @@ sub _header_start
 	{
 	my( $self, $level ) = @_;
 
+	$self->{in_header} = 1;
 	if( $level )
 		{		
 		LEVEL: {
-			if( @{ $self->{in_section} } and $self->{in_section}[0] >= $level )
+			if( eval { @{ $self->{in_section} } } and $self->{in_section}[0] >= $level )
 				{
 				my $tag = shift @{ $self->{in_section} };
 				$self->add_xml_tag( "</sect$tag>\n" );
@@ -205,6 +220,7 @@ sub _header_start
 sub _header_end
 	{
 	my( $self, $level ) = @_;
+	$self->{in_header} = 0;
 
 	$self->add_xml_tag( "</title>\n" );
 	}
@@ -247,7 +263,7 @@ sub make_para
 	$self->add_xml_tag( '<para>' );
 	$self->add_to_scratch( $para );
 	$self->escape_and_emit;
-	$self->add_xml_tag( "<\para>\n" );
+	$self->add_xml_tag( "<\para>\n\n" );
 	}
 	
 sub start_Para      
@@ -265,7 +281,7 @@ sub end_Para
 	{ 
 	my $self = shift;
 	
-	$self->add_xml_tag( "</para>\n" );
+	$self->add_xml_tag( "</para>\n\n" );
 	
 	$self->end_non_code_text;
 
@@ -282,7 +298,7 @@ sub start_Verbatim
 	my $sequence = ++$_[0]{'verbatim_sequence'};
 	my $chapter  = $_[0]->chapter;
 	
-	$_[0]->add_xml_tag( qq|<programlisting format="linespecific" id="I_programlisting${chapter}_tt${sequence}" xml:space="preserve">| );
+	$_[0]->add_xml_tag( qq|\n<programlisting format="linespecific" id="I_programlisting${chapter}_tt${sequence}" xml:space="preserve">| );
 	$_[0]->emit;
 	}
 
@@ -291,9 +307,9 @@ sub end_Verbatim
 	my $self = shift;
 	
 	# get rid of all but one trailing newline
-	$self->escape_and_emit;
+	#$self->escape_and_emit;
 	
-	$self->add_xml_tag( "</programlisting>\n" );	
+	$self->add_xml_tag( "</programlisting>\n\n" );	
 		
 	$self->{'in_verbatim'} = 0;
 	}
@@ -310,65 +326,148 @@ sub _get_initial_item_type
 
 sub not_implemented { croak "Not implemented! " . (caller(1))[3] }
 
+sub in_item_list { scalar @{ $_[0]->{list_levels} } }
+sub add_list_level_item {
+	${ $_[0]->{list_levels} }[-1]{item_count}++;
+	}
+sub is_first_list_level_item {
+	${ $_[0]->{list_levels} }[-1]{item_count} == 0;
+	}
+	
+sub start_list_level
+	{
+	my $self = shift;
+	
+	push @{ $self->{list_levels} }, { item_count => 0 };	
+	}
+
+sub end_list_level
+	{
+	my $self = shift;
+	
+	pop @{ $self->{list_levels} };		
+	}
+	
 sub start_item_bullet 
 	{
 	my( $self ) = @_;
 	
-	$self->{in_item} = 1;
-	$self->{item_count}++;
-	
-	$self->add_to_scratch( "<listitem>\n" );
+	#print STDERR Dumper($self->{list_levels}), "\n"; use Data::Dumper;
+	$self->add_xml_tag( "</listitem>\n\n" )
+		unless $self->is_first_list_level_item;
+	$self->add_list_level_item;
+	$self->add_xml_tag( "<listitem>\n" );
 	$self->start_Para;
 	}
 
-sub start_item_number { $_[0]->add_to_scratch( '<listitem>' ) }
-sub start_item_block  { $_[0]->add_to_scratch( '<listitem>' ) }
-sub start_item_text   { $_[0]->add_to_scratch( '<listitem>' ) }
+sub start_item_number { 
+	$_[0]->add_xml_tag( '<listitemnumber>' ) 
+	}
+sub start_item_block  { $_[0]->add_xml_tag( '<listitemblock>' ) }
+sub start_item_text   { $_[0]->add_xml_tag( '<listitemtext>' ) }
 
 sub end_item_bullet
 	{ 	
 	my $self = shift;
 	$self->end_Para;
-	$self->add_to_scratch( "</listitem>\n\n" );
+#	$self->add_to_scratch( "</listitem>\n\n" );
 	$self->{in_item} = 0;
 	}	
-sub end_item_number { $_[0]->add_to_scratch( '</listitem>' ) }
-sub end_item_block  { $_[0]->add_to_scratch( '</listitem>' ) }
-sub end_item_text   { $_[0]->add_to_scratch( '</listitem>' ) }
+sub end_item_number { $_[0]->add_xml_tag( '</listitemnumber>' ) }
+sub end_item_block  { $_[0]->add_xml_tag( '</listitemblock>' ) }
+sub end_item_text   { $_[0]->add_xml_tag( '</listitemtext>' ) }
 
 sub start_over_bullet
 	{ 
 	my $self = shift;
-	$self->add_to_scratch( "\n<itemizedlist>\n" );
+	if( $self->{saw_exercises} ) {
+		$self->add_xml_tag( qq(\n<orderedlist continuation="restarts" inheritnum="ignore" numeration="arabic">\n\n) );
+		}
+	else {
+		$self->add_xml_tag( qq(<itemizedlist>) )
+		}
 
-	$self->{in_item_list} = 1;
-	$self->{item_count}   = 0;
+	$self->start_list_level;
+
 	}
-sub start_over_text   { $_[0]->add_to_scratch( '<itemizedlist>' ) }
-sub start_over_block  { $_[0]->add_to_scratch( '<itemizedlist>' ) }
-sub start_over_number { $_[0]->add_to_scratch( '<itemizedlist>' ) }
+sub start_over_text   { $_[0]->add_xml_tag( '<itemizedlist-text>' ) }
+sub start_over_block  { $_[0]->add_xml_tag( '<itemizedlist-block>' ) }
+sub start_over_number { $_[0]->add_xml_tag( '<itemizedlist-number>' ) }
 
 sub end_over_bullet 
 	{	
 	my $self = shift;
 	
-	$self->{in_item_list} = 0;	
-	$self->{item_count}   = 0;
 	$self->{last_thingy}  = 'item_list';
 	$self->end_non_code_text;
-	$self->add_to_scratch( "</itemizedlist>\n\n" );
+	$self->add_xml_tag( "</listitem>\n\n" );
+	
+	my $tag = $self->{saw_exercises} ? 'orderedlist' : 'itemizedlist';
+	
+	$self->add_to_scratch( "</$tag>\n\n" );
+	$self->end_list_level;
 	$self->emit;
 	$self->clear_scratch;
 	}
-sub end_over_text   { $_[0]->add_to_scratch( '</itemizedlist>' ) }
-sub end_over_block  { $_[0]->add_to_scratch( '</itemizedlist>' ) }
-sub end_over_number { $_[0]->add_to_scratch( '</itemizedlist>' ) }
+sub end_over_text   { 
+	$_[0]->add_xml_tag( '</listitemtext>' );
+	$_[0]->add_xml_tag( '</itemizedlisttext>' ) 
+	}
+sub end_over_block  {
+	$_[0]->add_xml_tag( '</listitemblock>' );
+	$_[0]->add_xml_tag( '</itemizedlistblock>' ) 
+	}
+sub end_over_number {
+	$_[0]->add_xml_tag( '</listitemnumber>' );
+	$_[0]->add_xml_tag( '</itemizedlistnumber>' ) 
+	}
+
+sub start_table { 
+	my( $self, $flags ) = @_;
+
+	my $id = $self->title . '-' . $self->chapter . '-TABLE-' . ++$_[0]{'table_count'};
+	$self->add_xml_tag( 
+		qq|<table id="$id" label="">\n| .
+		qq|<title>$flags->{'title'}</title>\n| .
+		qq|<tgroup cols="2">\n|
+		);
+	}
+
+sub end_table      { 
+	$_[0]{'in_bodyrow'} = 0; 
+	$_[0]->{rows} = 0; 
+	$_[0]->add_xml_tag( "</tbody></tgroup></table>\n" );
+	}
+
+sub start_headrow  { 
+	$_[0]{'in_headrow'} = 1; 
+	$_[0]{'in_bodyrow'} = 0; 
+	}
+sub start_bodyrows { 
+	$_[0]{'in_bodyrow'} = 1; 
+	}
+
+sub start_row { 
+	$_[0]->{rows}++; 
+
+	   if( $_[0]->{rows} == 1 ) { $_[0]->add_xml_tag( qq(<thead>\n) ) }
+
+	$_[0]->add_xml_tag( qq(<row>\n) );
+	}
+sub end_row { 
+	$_[0]->add_xml_tag( qq(</row>\n) );
+	if( $_[0]{'in_bodyrow'} and $_[0]{'in_headrow'} ) { $_[0]->add_xml_tag( qq(</thead>\n<tbody>\n) ); $_[0]{'in_headrow'}=0; }
+	}
+
+sub start_cell { $_[0]->add_xml_tag( qq(\t<entry align="left" valign="top">) ) }
+sub end_cell   { $_[0]->add_xml_tag( qq(</entry>\n) )
+}
 
 
 sub end_B   { $_[0]->add_xml_tag( '</emphasis>' ); $_[0]->{in_B} = 0; }
 sub start_B  
 	{	
-	$_[0]->add_xml_tag( '<emphasis>' ); 
+	$_[0]->add_xml_tag( '<emphasis role="bold">' ); 
 	$_[0]->{in_B} = 1;
 	}
 
@@ -377,6 +476,9 @@ sub start_C { $_[0]->add_xml_tag( '<literal moreinfo="none">' ); $_[0]->{in_C} =
 	
 sub end_I   { $_[0]->add_xml_tag( '</emphasis>' ) }
 sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
+
+sub end_F   { $_[0]->add_xml_tag( '</emphasis>' ) }
+sub start_F { $_[0]->add_xml_tag( '<emphasis>' )  }
 
 =pod
 
@@ -388,8 +490,12 @@ sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
 
 =cut
 
-sub end_F   { $_[0]->add_xml_tag( '</filename>' ); $_[0]->{in_C} = 0; }
-sub start_F { $_[0]->add_xml_tag( '<filename>' ); $_[0]->{in_C} = 1; }
+sub end_N   { $_[0]->add_xml_tag( '</para></footnote>' ); $_[0]->{in_N} = 0; }
+sub start_N {
+	$_[0]->{in_N} = 1; 
+	my $id = join '-', 'footnote', $_[0]->title, $_[0]->chapter, $_[0]->{footnote}++;
+	$_[0]->add_xml_tag( qq|<footnote id="$id"><para>| );
+	}
 
 sub start_M
 	{	
@@ -404,9 +510,6 @@ sub end_M
 	$_[0]{'module_flag'} = 0;
 	}
 
-sub start_N { }
-sub end_N   { }
-
 sub start_U { $_[0]->start_I }
 sub end_U   { $_[0]->end_I   }
 
@@ -414,9 +517,12 @@ sub handle_text
 	{
 	my( $self, $text ) = @_;
 
+	if( $text eq 'Exercises' ) {
+		$self->{saw_exercises} = 1;
+		}
 	my $pad = $self->get_pad;
 		
-	#$self->escape_text( \$text );
+	$self->escape_text( \$text );
 	$self->{$pad} .= $text;
 	
 	unless( $self->dont_escape )
@@ -488,7 +594,7 @@ sub _ponder_Verbatim {
 	$para->[1]{'xml:space'} = 'preserve';
 	foreach my $line ( @$para[ 2 .. $#$para ] ) 
 		{
-		$line =~ s/^\t//gm;
+		$line =~ s/^(\t|  )//gm;
 		$line =~ s/^(\t+)/" " x ( 4 * length($1) )/e
   		}
   
@@ -582,7 +688,7 @@ L<Pod::PseudoPod>, L<Pod::Simple>
 
 This source is in Github:
 
-	http://github.com/briandfoy/Pod-WordML
+	http://github.com/briandfoy/Pod-DocBook
 
 If, for some reason, I disappear from the world, one of the other
 members of the project can shepherd this module appropriately.
@@ -598,5 +704,242 @@ Copyright (c) 2010, brian d foy, All Rights Reserved.
 You may redistribute this under the same terms as Perl itself.
 
 =cut
+
+sub _ponder_paragraph_buffer {
+
+  # Para-token types as found in the buffer.
+  #   ~Verbatim, ~Para, ~end, =head1..4, =for, =begin, =end,
+  #   =over, =back, =item
+  #   and the null =pod (to be complained about if over one line)
+  #
+  # "~data" paragraphs are something we generate at this level, depending on
+  # a currently open =over region
+
+  # Events fired:  Begin and end for:
+  #                   directivename (like head1 .. head4), item, extend,
+  #                   for (from =begin...=end, =for),
+  #                   over-bullet, over-number, over-text, over-block,
+  #                   item-bullet, item-number, item-text,
+  #                   Document,
+  #                   Data, Para, Verbatim
+  #                   B, C, longdirname (TODO -- wha?), etc. for all directives
+  # 
+
+  my $self = $_[0];
+  my $paras;
+  return unless @{$paras = $self->{'paras'}};
+  my $curr_open = ($self->{'curr_open'} ||= []);
+
+  DEBUG > 10 and print "# Paragraph buffer: <<", pretty($paras), ">>\n";
+
+  # We have something in our buffer.  So apparently the document has started.
+  unless($self->{'doc_has_started'}) {
+    $self->{'doc_has_started'} = 1;
+    
+    my $starting_contentless;
+    $starting_contentless =
+     (
+       !@$curr_open  
+       and @$paras and ! grep $_->[0] ne '~end', @$paras
+        # i.e., if the paras is all ~ends
+     )
+    ;
+    DEBUG and print "# Starting ", 
+      $starting_contentless ? 'contentless' : 'contentful',
+      " document\n"
+    ;
+    
+    $self->_handle_element_start('Document',
+      {
+        'start_line' => $paras->[0][1]{'start_line'},
+        $starting_contentless ? ( 'contentless' => 1 ) : (),
+      },
+    );
+  }
+
+  my($para, $para_type);
+  while(@$paras) {
+    last if @$paras == 1 and
+      ( $paras->[0][0] eq '=over' or $paras->[0][0] eq '~Verbatim'
+        or $paras->[0][0] eq '=item' )
+    ;
+    # Those're the three kinds of paragraphs that require lookahead.
+    #   Actually, an "=item Foo" inside an <over type=text> region
+    #   and any =item inside an <over type=block> region (rare)
+    #   don't require any lookahead, but all others (bullets
+    #   and numbers) do.
+
+# TODO: winge about many kinds of directives in non-resolving =for regions?
+# TODO: many?  like what?  =head1 etc?
+
+    $para = shift @$paras;
+    $para_type = $para->[0];
+
+    DEBUG > 1 and print "Pondering a $para_type paragraph, given the stack: (",
+      $self->_dump_curr_open(), ")\n";
+    
+    if($para_type eq '=for') {
+      next if $self->_ponder_for($para,$curr_open,$paras);
+    } elsif($para_type eq '=begin') {
+      next if $self->_ponder_begin($para,$curr_open,$paras);
+    } elsif($para_type eq '=end') {
+      next if $self->_ponder_end($para,$curr_open,$paras);
+    } elsif($para_type eq '~end') { # The virtual end-document signal
+      next if $self->_ponder_doc_end($para,$curr_open,$paras);
+    }
+
+
+    # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    if(grep $_->[1]{'~ignore'}, @$curr_open) {
+      DEBUG > 1 and
+       print "Skipping $para_type paragraph because in ignore mode.\n";
+      next;
+    }
+    #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    if($para_type eq '=pod') {
+      $self->_ponder_pod($para,$curr_open,$paras);
+    } elsif($para_type eq '=over') {
+      next if $self->_ponder_over($para,$curr_open,$paras);
+    } elsif($para_type eq '=back') {
+      next if $self->_ponder_back($para,$curr_open,$paras);
+    } elsif($para_type eq '=row') {
+      next if $self->_ponder_row_start($para,$curr_open,$paras);
+      
+    } elsif( $para_type eq '=headrow'){
+    	$self->start_headrow;
+    } elsif( $para_type eq '=bodyrows') {
+    	$self->start_bodyrows;
+    	}
+    
+    else {
+      # All non-magical codes!!!
+      
+      # Here we start using $para_type for our own twisted purposes, to
+      #  mean how it should get treated, not as what the element name
+      #  should be.
+
+      DEBUG > 1 and print "Pondering non-magical $para_type\n";
+
+      # In tables, the start of a headrow or bodyrow also terminates an 
+      # existing open row.
+      if($para_type eq '=headrow' || $para_type eq '=bodyrows') {
+        $self->_ponder_row_end($para,$curr_open,$paras);
+      }
+
+      # Enforce some =headN discipline
+      if($para_type =~ m/^=head\d$/s
+         and ! $self->{'accept_heads_anywhere'}
+         and @$curr_open
+         and $curr_open->[-1][0] eq '=over'
+      ) {
+        DEBUG > 2 and print "'=$para_type' inside an '=over'!\n";
+        $self->whine(
+          $para->[1]{'start_line'},
+          "You forgot a '=back' before '$para_type'"
+        );
+        unshift @$paras, ['=back', {}, ''], $para;   # close the =over
+        next;
+      }
+
+
+      if($para_type eq '=item') {
+        next if $self->_ponder_item($para,$curr_open,$paras);
+        $para_type = 'Plain';
+        # Now fall thru and process it.
+
+      } elsif($para_type eq '=extend') {
+        # Well, might as well implement it here.
+        $self->_ponder_extend($para);
+        next;  # and skip
+      } elsif($para_type eq '=encoding') {
+        # Not actually acted on here, but we catch errors here.
+        $self->_handle_encoding_second_level($para);
+
+        next;  # and skip
+      } elsif($para_type eq '~Verbatim') {
+        $para->[0] = 'Verbatim';
+        $para_type = '?Verbatim';
+      } elsif($para_type eq '~Para') {
+        $para->[0] = 'Para';
+        $para_type = '?Plain';
+      } elsif($para_type eq 'Data') {
+        $para->[0] = 'Data';
+        $para_type = '?Data';
+      } elsif( $para_type =~ s/^=//s
+        and defined( $para_type = $self->{'accept_directives'}{$para_type} )
+      ) {
+        DEBUG > 1 and print " Pondering known directive ${$para}[0] as $para_type\n";
+      } else {
+        # An unknown directive!
+        DEBUG > 1 and printf "Unhandled directive %s (Handled: %s)\n",
+         $para->[0], join(' ', sort keys %{$self->{'accept_directives'}} )
+        ;
+        $self->whine(
+          $para->[1]{'start_line'},
+          "Unknown directive: $para->[0]"
+        );
+
+        # And maybe treat it as text instead of just letting it go?
+        next;
+      }
+
+      if($para_type =~ s/^\?//s) {
+        if(! @$curr_open) {  # usual case
+          DEBUG and print "Treating $para_type paragraph as such because stack is empty.\n";
+        } else {
+          my @fors = grep $_->[0] eq '=for', @$curr_open;
+          DEBUG > 1 and print "Containing fors: ",
+            join(',', map $_->[1]{'target'}, @fors), "\n";
+          
+          if(! @fors) {
+            DEBUG and print "Treating $para_type paragraph as such because stack has no =for's\n";
+            
+          #} elsif(grep $_->[1]{'~resolve'}, @fors) {
+          #} elsif(not grep !$_->[1]{'~resolve'}, @fors) {
+          } elsif( $fors[-1][1]{'~resolve'} ) {
+            # Look to the immediately containing for
+          
+            if($para_type eq 'Data') {
+              DEBUG and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+              $para->[0] = 'Para';
+              $para_type = 'Plain';
+            } else {
+              DEBUG and print "Treating $para_type paragraph as such because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+            }
+          } else {
+            DEBUG and print "Treating $para_type paragraph as Data because the containing =for ($fors[-1][1]{'target'}) is a non-resolver\n";
+            $para->[0] = $para_type = 'Data';
+          }
+        }
+      }
+
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if($para_type eq 'Plain') {
+        $self->_ponder_Plain($para);
+      } elsif($para_type eq 'Verbatim') {
+        $self->_ponder_Verbatim($para);
+      } elsif($para_type eq 'Data') {
+        $self->_ponder_Data($para);
+      } else {
+        die "\$para type is $para_type -- how did that happen?";
+        # Shouldn't happen.
+      }
+
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      $para->[0] =~ s/^[~=]//s;
+
+      DEBUG and print "\n", Pod::Simple::BlackBox::pretty($para), "\n";
+
+      # traverse the treelet (which might well be just one string scalar)
+      $self->{'content_seen'} ||= 1;
+      $self->_traverse_treelet_bit(@$para);
+    }
+  }
+  
+  return;
+}
 
 1;

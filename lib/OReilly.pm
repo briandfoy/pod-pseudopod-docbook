@@ -1,6 +1,6 @@
-package Pod::DocBook::OReilly;
+package Pod::PseudoPod::DocBook::OReilly;
 use strict;
-use base 'Pod::DocBook';
+use base 'Pod::PseudoPod::DocBook';
 
 use warnings;
 no warnings;
@@ -12,7 +12,7 @@ $VERSION = '0.13';
 
 =head1 NAME
 
-Pod::DocBook::OReilly - Turn Pod into O'Reilly's DocBook
+Pod::PseudoPod::DocBook::OReilly - Turn Pod into O'Reilly's DocBook
 
 =head1 SYNOPSIS
 

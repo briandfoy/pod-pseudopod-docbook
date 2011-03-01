@@ -10,6 +10,7 @@ require 't/lib/transform_file.pl';
 chdir 'test-corpus';
 my @files = glob( '*.pod' );
 chdir '..';
+print STDERR "Found @files\n";
 
 foreach my $file ( @files )
 	{
