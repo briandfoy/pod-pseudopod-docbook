@@ -532,14 +532,44 @@ sub end_M
 	$_[0]{'module_flag'} = 0;
 	}
 
-sub start_U { $_[0]->start_I }
-sub end_U   { $_[0]->end_I   }
+sub end_N   { $_[0]->add_xml_tag( '</para></footnote>' ); $_[0]->{in_N} = 0; }
+sub start_N {
+	$_[0]->{in_N} = 1;
+	my $id = join '-', 'footnote', $_[0]->title, $_[0]->chapter, $_[0]->{footnote}++;
+	$_[0]->add_xml_tag( qq|<footnote id="$id"><para>| );
+	}
+
+sub start_R { $_[0]->emit; $_[0]->{in_R} = 1 }
+sub end_R   {
+	my $pad = $_[0]->get_pad;
+	my $text = $_[0]->{$pad};
+	$_[0]->clear_pad;
+
+	$_[0]->add_xml_tag( qq|<xref ref="$text" />| );
+	$_[0]->emit;
+	$_[0]->{in_R} = 0;
+	}
+
+sub start_T { $_[0]->add_xml_tag( '<citetitle>' )  }
+sub end_T   { $_[0]->add_xml_tag( '</citetitle>' ) }
+
+sub start_U { $_[0]->emit; $_[0]->{in_U} = 1 }
+sub end_U   {
+	my $pad = $_[0]->get_pad;
+	my $text = $_[0]->{$pad};
+	$_[0]->clear_pad;
+
+	$_[0]->add_xml_tag( qq|<ulink url="$text" />| );
+	$_[0]->emit;
+	$_[0]->{in_U} = 0;
+	}
 
 sub handle_text
 	{
 	my( $self, $text ) = @_;
 
 	if( $text eq 'Exercises' ) {
+	print STDERR "In exercises\n";
 		$self->{saw_exercises} = 1;
 		}
 	my $pad = $self->get_pad;
