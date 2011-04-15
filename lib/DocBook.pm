@@ -493,17 +493,34 @@ sub start_F { $_[0]->add_xml_tag( '<emphasis>' )  }
           historical data.</para>
         </footnote>
 
+<ulink role="orm:hideurl"
+url="http://www.guardian.co.uk/film/2006/
+sep/22/londonfilmfestival2006.londonfilmfestival">Automavision</ulink>
 =cut
 
-sub end_N   { $_[0]->add_xml_tag( '</para></footnote>' ); $_[0]->{in_N} = 0; }
-sub start_N {
-	$_[0]->{in_N} = 1; 
-	my $id = join '-', 'footnote', $_[0]->title, $_[0]->chapter, $_[0]->{footnote}++;
-	$_[0]->add_xml_tag( qq|<footnote id="$id"><para>| );
+sub end_L   {
+	my $pad = $_[0]->get_pad;
+	my $text = $_[0]->{$pad};
+	$_[0]->clear_pad;
+	my $link = do {
+		if( $text =~ /\A(perl[a-z0-9]+)\z/ ) { "http://perldoc.perl.org/$1.html" }
+		};
+
+	$_[0]->add_xml_tag( qq|<ulink role="orm:hideurl" url="$link">| );
+	$_[0]->add_to_pad( $text );
+	$_[0]->add_xml_tag( '</ulink>' );
+	$_[0]->emit;
+	$_[0]->{in_L} = 0;
 	}
 
+sub start_L {
+	$_[0]->emit;
+	$_[0]->{in_L} = 1;
+	}
+
+
 sub start_M
-	{	
+	{
 	$_[0]{'module_flag'} = 1;
 	$_[0]{'module_text'} = '';
 	$_[0]->start_C;
