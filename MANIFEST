@@ -1,0 +1,23 @@
+Changes
+examples/placeholder.pl
+lib/DocBook.pm
+lib/OReilly.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+README
+t/convert_pod.t
+t/lib/transform_file.pl
+t/load.t
+t/pod.t
+t/pod_coverage.t
+t/test_manifest
+test-corpus/chapter.xml
+test-corpus/chop
+test-corpus/clone
+test-corpus/test
+test-corpus/test.pod
+test-corpus/test.xml
+test-corpus/test.xml.debug
+test-corpus/test2
+test-corpus/test3
