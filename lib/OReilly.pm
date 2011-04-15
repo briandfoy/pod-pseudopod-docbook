@@ -24,7 +24,7 @@ Pod::PseudoPod::DocBook::OReilly - Turn Pod into O'Reilly's DocBook
 
 I wrote just enough of this module to get my job done, and I skipped every
 part of the specification I didn't need while still making it flexible enough
-to handle stuff later. 
+to handle stuff later.
 
 =head2 The style information
 
@@ -36,7 +36,7 @@ can override those in a subclass.
 
 =over 4
 
-	
+
 =cut
 
 =back

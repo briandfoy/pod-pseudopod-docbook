@@ -28,7 +28,7 @@ Pod::PseudoPod::DocBook - Turn Pod into DocBook
 
 I wrote just enough of this module to get my job done, and I skipped every
 part of the specification I didn't need while still making it flexible enough
-to handle stuff later. 
+to handle stuff later.
 
 =head2 The style information
 
@@ -43,7 +43,7 @@ can override those in a subclass.
 =item document_header
 
 This is the start of the document that defines all of the styles. You'll need
-to override this. You can take this directly from 
+to override this. You can take this directly from
 
 =cut
 
@@ -70,22 +70,22 @@ sub escape_and_emit
 	my $pad = $self->get_pad;
 
 	$self->{$pad} =~ s/\s+\z//;
-	
+
 	$self->{$pad} =~ s/&/&amp;/g;
 	$self->{$pad} =~ s/</&lt;/g;
 	$self->{$pad} =~ s/>/&gt;/g;
 
 	$self->emit;
 	}
-	
-sub add_to_pad 
+
+sub add_to_pad
 	{
 	my( $self, $stuff ) = @_;
 	my $pad = $self->get_pad;
 	$self->{$pad} .= $stuff;
 	}
 
-sub clear_pad 
+sub clear_pad
 	{
 	my( $self ) = @_;
 
@@ -101,11 +101,11 @@ sub chapter    { $_[0]->{chapter}    }
 sub section    { $_[0]->{section}    }
 sub subsection { $_[0]->{subsection} }
 
-sub document_header  
+sub document_header
 	{
 	my $string = <<"XML";
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" 
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <!-- created by brian's private converter -->
 XML
@@ -152,13 +152,13 @@ Everything else is the same stuff from C<Pod::Simple>.
 =cut
 
 use Data::Dumper;
-sub new { 
+sub new {
 	my $self = $_[0]->SUPER::new();
 	$self->{accept_targets}{table}++;
 	$self;
 	}
 
-sub emit 
+sub emit
 	{
 	my $pad = $_[0]->get_pad;
 	print {$_[0]->{'output_fh'}} $_[0]->{$pad};
@@ -181,13 +181,13 @@ sub get_pad
 sub start_Document
 	{
 	$_[0]->{in_section} = [];
-	$_[0]->add_to_pad( $_[0]->document_header ); 
+	$_[0]->add_to_pad( $_[0]->document_header );
 	$_[0]->emit;
 	}
 
-sub end_Document    
+sub end_Document
 	{
-	$_[0]->add_to_pad( $_[0]->document_footer ); 
+	$_[0]->add_to_pad( $_[0]->document_footer );
 	$_[0]->emit;
 	}
 
@@ -197,7 +197,7 @@ sub _header_start
 
 	$self->{in_header} = 1;
 	if( $level )
-		{		
+		{
 		LEVEL: {
 			if( eval { @{ $self->{in_section} } } and $self->{in_section}[0] >= $level )
 				{
@@ -206,23 +206,23 @@ sub _header_start
 				redo LEVEL;
 				}
 			last LEVEL;
-			}			
-		
+			}
+
 		my @parts = qw(title chapter section);
 		push @parts, 'subsection' if $level > 1;
-		
+
 		@parts = map { $self->$_() } @parts;
-		
+
 		my $id = join '-', @parts;
 		my $tag = qq|\n<sect$level id="$id">\n|;
-	
+
 		$self->add_xml_tag( $tag );
 		unshift @{ $self->{in_section} }, $level;
 		}
-		
+
 	$self->add_xml_tag( qq|<title>| );
 	}
-	
+
 sub _header_end
 	{
 	my( $self, $level ) = @_;
@@ -233,20 +233,20 @@ sub _header_end
 
 sub start_head0     { $_[0]->_header_start( 0 ); }
 sub end_head0       { $_[0]->_header_end( 0 );   }
-	
+
 sub end_head1       { $_[0]->_header_end( 1 );   }
-sub start_head1     { 
+sub start_head1     {
 	$_[0]->{section}++;
 	$_[0]->{subsection} = 0;
 
-	$_[0]->_header_start( 1 ); 
+	$_[0]->_header_start( 1 );
 	}
 
 sub end_head2       { $_[0]->_header_end( 2 );   }
 sub start_head2     {
 	$_[0]->{subsection}++;
 
-	$_[0]->_header_start( 2 ); 
+	$_[0]->_header_start( 2 );
 	}
 
 sub start_head3     { $_[0]->_header_start( 3 ); }
@@ -256,39 +256,39 @@ sub end_head3       { $_[0]->_header_end( 3 );   }
 sub end_non_code_text
 	{
 	my $self = shift;
-	
+
 	$self->make_curly_quotes;
-	
+
 	$self->emit;
 	}
 
 sub make_para
 	{
 	my( $self, $style, $para ) = @_;
-	
+
 	$self->add_xml_tag( '<para>' );
 	$self->add_to_pad( $para );
 	$self->escape_and_emit;
 	$self->add_xml_tag( "<\para>\n\n" );
 	}
-	
-sub start_Para      
-	{ 
+
+sub start_Para
+	{
 	my $self = shift;
-	
+
 	$self->add_xml_tag( qq|<para>| );
-		
+
 	$self->escape_and_emit;
-	
-	$self->{'in_para'} = 1; 
+
+	$self->{'in_para'} = 1;
 	}
 
-sub end_Para        
-	{ 
+sub end_Para
+	{
 	my $self = shift;
-	
+
 	$self->add_xml_tag( "</para>\n\n" );
-	
+
 	$self->end_non_code_text;
 
 	$self->{'in_para'} = 0;
@@ -297,35 +297,35 @@ sub end_Para
 sub start_figure 	{ }
 
 sub end_figure      { }
-	
-sub start_Verbatim 
-	{ 
+
+sub start_Verbatim
+	{
 	$_[0]{'in_verbatim'} = 1;
 	my $sequence = ++$_[0]{'verbatim_sequence'};
 	my $chapter  = $_[0]->chapter;
-	
+
 	$_[0]->add_xml_tag( qq|\n<programlisting format="linespecific" id="I_programlisting_${chapter}_tt${sequence}" xml:space="preserve">| );
 	$_[0]->emit;
 	}
 
-sub end_Verbatim 
+sub end_Verbatim
 	{
 	my $self = shift;
-	
+
 	# get rid of all but one trailing newline
 	#$self->escape_and_emit;
-	
-	$self->add_xml_tag( "</programlisting>\n\n" );	
-		
+
+	$self->add_xml_tag( "</programlisting>\n\n" );
+
 	$self->{'in_verbatim'} = 0;
 	}
 
-sub _get_initial_item_type 
+sub _get_initial_item_type
 	{
 	my $self = shift;
-  
+
 	my $type = $self->SUPER::_get_initial_item_type;
-    
+
 	$type;
 	}
 
@@ -339,25 +339,25 @@ sub add_list_level_item {
 sub is_first_list_level_item {
 	${ $_[0]->{list_levels} }[-1]{item_count} == 0;
 	}
-	
+
 sub start_list_level
 	{
 	my $self = shift;
-	
-	push @{ $self->{list_levels} }, { item_count => 0 };	
+
+	push @{ $self->{list_levels} }, { item_count => 0 };
 	}
 
 sub end_list_level
 	{
 	my $self = shift;
-	
-	pop @{ $self->{list_levels} };		
+
+	pop @{ $self->{list_levels} };
 	}
-	
-sub start_item_bullet 
+
+sub start_item_bullet
 	{
 	my( $self ) = @_;
-	
+
 	#print STDERR Dumper($self->{list_levels}), "\n"; use Data::Dumper;
 	$self->add_xml_tag( "</listitem>\n\n" )
 		unless $self->is_first_list_level_item;
@@ -366,25 +366,25 @@ sub start_item_bullet
 	$self->start_Para;
 	}
 
-sub start_item_number { 
-	$_[0]->add_xml_tag( '<listitemnumber>' ) 
+sub start_item_number {
+	$_[0]->add_xml_tag( '<listitemnumber>' )
 	}
 sub start_item_block  { $_[0]->add_xml_tag( '<listitemblock>' ) }
 sub start_item_text   { $_[0]->add_xml_tag( '<listitemtext>' ) }
 
 sub end_item_bullet
-	{ 	
+	{
 	my $self = shift;
 	$self->end_Para;
 #	$self->add_to_pad( "</listitem>\n\n" );
 	$self->{in_item} = 0;
-	}	
+	}
 sub end_item_number { $_[0]->add_xml_tag( '</listitemnumber>' ) }
 sub end_item_block  { $_[0]->add_xml_tag( '</listitemblock>' ) }
 sub end_item_text   { $_[0]->add_xml_tag( '</listitemtext>' ) }
 
 sub start_over_bullet
-	{ 
+	{
 	my $self = shift;
 	if( $self->{saw_exercises} ) {
 		$self->add_xml_tag( qq(\n<orderedlist continuation="restarts" inheritnum="ignore" numeration="arabic">\n\n) );
@@ -400,66 +400,66 @@ sub start_over_text   { $_[0]->add_xml_tag( '<itemizedlist-text>' ) }
 sub start_over_block  { $_[0]->add_xml_tag( '<itemizedlist-block>' ) }
 sub start_over_number { $_[0]->add_xml_tag( '<itemizedlist-number>' ) }
 
-sub end_over_bullet 
-	{	
+sub end_over_bullet
+	{
 	my $self = shift;
-	
+
 	$self->{last_thingy}  = 'item_list';
 	$self->end_non_code_text;
 	$self->add_xml_tag( "</listitem>\n\n" );
-	
+
 	my $tag = $self->{saw_exercises} ? 'orderedlist' : 'itemizedlist';
-	
+
 	$self->add_to_pad( "</$tag>\n\n" );
 	$self->end_list_level;
 	$self->emit;
 	}
-sub end_over_text   { 
+sub end_over_text   {
 	$_[0]->add_xml_tag( '</listitemtext>' );
-	$_[0]->add_xml_tag( '</itemizedlisttext>' ) 
+	$_[0]->add_xml_tag( '</itemizedlisttext>' )
 	}
 sub end_over_block  {
 	$_[0]->add_xml_tag( '</listitemblock>' );
-	$_[0]->add_xml_tag( '</itemizedlistblock>' ) 
+	$_[0]->add_xml_tag( '</itemizedlistblock>' )
 	}
 sub end_over_number {
 	$_[0]->add_xml_tag( '</listitemnumber>' );
-	$_[0]->add_xml_tag( '</itemizedlistnumber>' ) 
+	$_[0]->add_xml_tag( '</itemizedlistnumber>' )
 	}
 
-sub start_table { 
+sub start_table {
 	my( $self, $flags ) = @_;
 
 	my $id = $self->title . '-' . $self->chapter . '-TABLE-' . ++$_[0]{'table_count'};
-	$self->add_xml_tag( 
+	$self->add_xml_tag(
 		qq|<table id="$id" label="">\n| .
 		qq|<title>$flags->{'title'}</title>\n| .
 		qq|<tgroup cols="2">\n|
 		);
 	}
 
-sub end_table      { 
-	$_[0]{'in_bodyrow'} = 0; 
-	$_[0]->{rows} = 0; 
+sub end_table      {
+	$_[0]{'in_bodyrow'} = 0;
+	$_[0]->{rows} = 0;
 	$_[0]->add_xml_tag( "</tbody></tgroup></table>\n" );
 	}
 
-sub start_headrow  { 
-	$_[0]{'in_headrow'} = 1; 
-	$_[0]{'in_bodyrow'} = 0; 
+sub start_headrow  {
+	$_[0]{'in_headrow'} = 1;
+	$_[0]{'in_bodyrow'} = 0;
 	}
-sub start_bodyrows { 
-	$_[0]{'in_bodyrow'} = 1; 
+sub start_bodyrows {
+	$_[0]{'in_bodyrow'} = 1;
 	}
 
-sub start_row { 
-	$_[0]->{rows}++; 
+sub start_row {
+	$_[0]->{rows}++;
 
 	   if( $_[0]->{rows} == 1 ) { $_[0]->add_xml_tag( qq(<thead>\n) ) }
 
 	$_[0]->add_xml_tag( qq(<row>\n) );
 	}
-sub end_row { 
+sub end_row {
 	$_[0]->add_xml_tag( qq(</row>\n) );
 	if( $_[0]{'in_bodyrow'} and $_[0]{'in_headrow'} ) { $_[0]->add_xml_tag( qq(</thead>\n<tbody>\n) ); $_[0]{'in_headrow'}=0; }
 	}
@@ -469,21 +469,21 @@ sub end_cell   { $_[0]->add_xml_tag( qq(</entry>\n) )
 }
 
 
-sub end_B   { $_[0]->add_xml_tag( '</emphasis>' ); $_[0]->{in_B} = 0; }
-sub start_B  
-	{	
-	$_[0]->add_xml_tag( '<emphasis role="bold">' ); 
+sub end_B   { $_[0]->add_xml_tag( '</command>' ); $_[0]->{in_B} = 0; }
+sub start_B
+	{
+	$_[0]->add_xml_tag( '<command>' );
 	$_[0]->{in_B} = 1;
 	}
 
 sub end_C   { $_[0]->add_xml_tag( '</literal>' ); $_[0]->{in_C} = 0; }
 sub start_C { $_[0]->add_xml_tag( '<literal moreinfo="none">' ); $_[0]->{in_C} = 1; }
-	
+
+sub end_F   { $_[0]->add_xml_tag( '</filename>' ) }
+sub start_F { $_[0]->add_xml_tag( '<filename>' )  }
+
 sub end_I   { $_[0]->add_xml_tag( '</emphasis>' ) }
 sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
-
-sub end_F   { $_[0]->add_xml_tag( '</emphasis>' ) }
-sub start_F { $_[0]->add_xml_tag( '<emphasis>' )  }
 
 =pod
 
@@ -573,10 +573,10 @@ sub handle_text
 		$self->{saw_exercises} = 1;
 		}
 	my $pad = $self->get_pad;
-		
+
 	$self->escape_text( \$text );
 	$self->{$pad} .= $text;
-	
+
 	unless( $self->dont_escape )
 		{
 		$self->make_curly_quotes;
@@ -589,11 +589,11 @@ sub dont_escape {
 	my $self = shift;
 	$self->{in_verbatim} || $self->{in_C}
 	}
-	
+
 sub escape_text
 	{
 	my( $self, $text_ref ) = @_;
-	
+
 	$$text_ref =~ s/&/&amp;/g;
 	$$text_ref =~ s/</&lt;/g;
 
@@ -603,37 +603,37 @@ sub escape_text
 sub make_curly_quotes
 	{
 	my( $self ) = @_;
-		
+
 	my $text = $self->{scratch};
-	
+
 	require Tie::Cycle;
-	
+
 	tie my $cycle, 'Tie::Cycle', [ qw( &#x201C; &#x201D; ) ];
 
 	1 while $text =~ s/"/$cycle/;
-		
+
 	# escape escape chars. This is escpaing them for InDesign
 	# so don't worry about double escaping for other levels. Don't
 	# worry about InDesign in the pod.
 	$text =~ s/'/&#x2019;/g;
-	
+
 	$self->{'scratch'} = $text;
-	
+
 	return 1;
 	}
 
 sub make_em_dashes
-	{		
-	$_[0]->{scratch} =~ s/--/&#x2014;/g;	
+	{
+	$_[0]->{scratch} =~ s/--/&#x2014;/g;
 	return 1;
 	}
 
 sub make_ellipses
-	{		
-	$_[0]->{scratch} =~ s/\Q.../&#x2026;/g;	
+	{
+	$_[0]->{scratch} =~ s/\Q.../&#x2026;/g;
 	return 1;
 	}
-	
+
 BEGIN {
 require Pod::Simple::BlackBox;
 
@@ -644,12 +644,12 @@ sub _ponder_Verbatim {
 	DEBUG and print STDERR " giving verbatim treatment...\n";
 
 	$para->[1]{'xml:space'} = 'preserve';
-	foreach my $line ( @$para[ 2 .. $#$para ] ) 
+	foreach my $line ( @$para[ 2 .. $#$para ] )
 		{
 		$line =~ s/^(\t|  )//gm;
 		$line =~ s/^(\t+)/" " x ( 4 * length($1) )/e
   		}
-  
+
   # Now the VerbatimFormatted hoodoo...
   if( $self->{'accept_codes'} and
       $self->{'accept_codes'}{'VerbatimFormatted'}
@@ -676,11 +676,11 @@ sub _ponder_Verbatim {
 BEGIN {
 
 # override _treat_Es so I can localize e2char
-sub _treat_Es 
-	{ 
+sub _treat_Es
+	{
 	my $self = shift;
 
-	require Pod::Escapes;	
+	require Pod::Escapes;
 	local *Pod::Escapes::e2char = *e2char_tagged_text;
 
 	$self->SUPER::_treat_Es( @_ );
@@ -689,33 +689,33 @@ sub _treat_Es
 sub e2char_tagged_text
 	{
 	package Pod::Escapes;
-	
+
 	my $in = shift;
 
 	return unless defined $in and length $in;
-	
-	   if( $in =~ m/^(0[0-7]*)$/ )         { $in = oct $in; } 
+
+	   if( $in =~ m/^(0[0-7]*)$/ )         { $in = oct $in; }
 	elsif( $in =~ m/^0?x([0-9a-fA-F]+)$/ ) { $in = hex $1;  }
 
-	if( $NOT_ASCII ) 
+	if( $NOT_ASCII )
 	  	{
-		unless( $in =~ m/^\d+$/ ) 
+		unless( $in =~ m/^\d+$/ )
 			{
 			$in = $Name2character{$in};
 			return unless defined $in;
-			$in = ord $in; 
+			$in = ord $in;
 	    	}
 
 		return $Code2USASCII{$in}
 			|| $Latin1Code_to_fallback{$in}
 			|| $FAR_CHAR;
 		}
- 
+
  	if( defined $Name2character_number{$in} and $Name2character_number{$in} < 127 )
  		{
  		return "&$in;";
  		}
-	elsif( defined $Name2character_number{$in} ) 
+	elsif( defined $Name2character_number{$in} )
 		{
 		# this needs to be fixed width because I want to look for
 		# it in a negative lookbehind
@@ -725,7 +725,7 @@ sub e2char_tagged_text
 		{
 		return '???';
 		}
-  
+
 	}
 }
 
@@ -775,7 +775,7 @@ sub _ponder_paragraph_buffer {
   #                   Document,
   #                   Data, Para, Verbatim
   #                   B, C, longdirname (TODO -- wha?), etc. for all directives
-  # 
+  #
 
   my $self = $_[0];
   my $paras;
@@ -787,20 +787,20 @@ sub _ponder_paragraph_buffer {
   # We have something in our buffer.  So apparently the document has started.
   unless($self->{'doc_has_started'}) {
     $self->{'doc_has_started'} = 1;
-    
+
     my $starting_contentless;
     $starting_contentless =
      (
-       !@$curr_open  
+       !@$curr_open
        and @$paras and ! grep $_->[0] ne '~end', @$paras
         # i.e., if the paras is all ~ends
      )
     ;
-    DEBUG and print "# Starting ", 
+    DEBUG and print "# Starting ",
       $starting_contentless ? 'contentless' : 'contentful',
       " document\n"
     ;
-    
+
     $self->_handle_element_start('Document',
       {
         'start_line' => $paras->[0][1]{'start_line'},
@@ -829,7 +829,7 @@ sub _ponder_paragraph_buffer {
 
     DEBUG > 1 and print "Pondering a $para_type paragraph, given the stack: (",
       $self->_dump_curr_open(), ")\n";
-    
+
     if($para_type eq '=for') {
       next if $self->_ponder_for($para,$curr_open,$paras);
     } elsif($para_type eq '=begin') {
@@ -859,23 +859,23 @@ sub _ponder_paragraph_buffer {
       next if $self->_ponder_back($para,$curr_open,$paras);
     } elsif($para_type eq '=row') {
       next if $self->_ponder_row_start($para,$curr_open,$paras);
-      
+
     } elsif( $para_type eq '=headrow'){
     	$self->start_headrow;
     } elsif( $para_type eq '=bodyrows') {
     	$self->start_bodyrows;
     	}
-    
+
     else {
       # All non-magical codes!!!
-      
+
       # Here we start using $para_type for our own twisted purposes, to
       #  mean how it should get treated, not as what the element name
       #  should be.
 
       DEBUG > 1 and print "Pondering non-magical $para_type\n";
 
-      # In tables, the start of a headrow or bodyrow also terminates an 
+      # In tables, the start of a headrow or bodyrow also terminates an
       # existing open row.
       if($para_type eq '=headrow' || $para_type eq '=bodyrows') {
         $self->_ponder_row_end($para,$curr_open,$paras);
@@ -945,15 +945,15 @@ sub _ponder_paragraph_buffer {
           my @fors = grep $_->[0] eq '=for', @$curr_open;
           DEBUG > 1 and print "Containing fors: ",
             join(',', map $_->[1]{'target'}, @fors), "\n";
-          
+
           if(! @fors) {
             DEBUG and print "Treating $para_type paragraph as such because stack has no =for's\n";
-            
+
           #} elsif(grep $_->[1]{'~resolve'}, @fors) {
           #} elsif(not grep !$_->[1]{'~resolve'}, @fors) {
           } elsif( $fors[-1][1]{'~resolve'} ) {
             # Look to the immediately containing for
-          
+
             if($para_type eq 'Data') {
               DEBUG and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
               $para->[0] = 'Para';
@@ -990,7 +990,7 @@ sub _ponder_paragraph_buffer {
       $self->_traverse_treelet_bit(@$para);
     }
   }
-  
+
   return;
 }
 
