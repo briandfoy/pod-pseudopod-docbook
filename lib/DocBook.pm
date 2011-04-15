@@ -302,7 +302,7 @@ sub start_Verbatim
 	my $sequence = ++$_[0]{'verbatim_sequence'};
 	my $chapter  = $_[0]->chapter;
 	
-	$_[0]->add_xml_tag( qq|\n<programlisting format="linespecific" id="I_programlisting${chapter}_tt${sequence}" xml:space="preserve">| );
+	$_[0]->add_xml_tag( qq|\n<programlisting format="linespecific" id="I_programlisting_${chapter}_tt${sequence}" xml:space="preserve">| );
 	$_[0]->emit;
 	}
 
