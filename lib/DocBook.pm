@@ -51,7 +51,7 @@ sub add_xml_tag
 	{
 	my( $self, $stuff ) = @_;
 
-	$self->add_to_scratch( $stuff );
+	$self->add_to_pad( $stuff );
 	$self->emit;
 	}
 
@@ -59,7 +59,7 @@ sub add_data
 	{
 	my( $self, $stuff ) = @_;
 
-	$self->add_to_scratch( $stuff );
+	$self->add_to_pad( $stuff );
 	$self->escape_and_emit;
 	}
 
@@ -67,27 +67,30 @@ sub escape_and_emit
 	{
 	my( $self ) = @_;
 
-	$self->{'scratch'} =~ s/\s+\z//;
+	my $pad = $self->get_pad;
+
+	$self->{$pad} =~ s/\s+\z//;
 	
-	$self->{'scratch'} =~ s/&/&amp;/g;
-	$self->{'scratch'} =~ s/</&lt;/g;
-	$self->{'scratch'} =~ s/>/&gt;/g;
+	$self->{$pad} =~ s/&/&amp;/g;
+	$self->{$pad} =~ s/</&lt;/g;
+	$self->{$pad} =~ s/>/&gt;/g;
 
 	$self->emit;
 	}
 	
-sub add_to_scratch 
+sub add_to_pad 
 	{
 	my( $self, $stuff ) = @_;
-
-	$self->{'scratch'} .= $stuff;
+	my $pad = $self->get_pad;
+	$self->{$pad} .= $stuff;
 	}
 
-sub clear_scratch 
+sub clear_pad 
 	{
 	my( $self ) = @_;
 
-	$self->{scratch} = '';
+	my $pad = $self->get_pad;
+	$self->{$pad} = '';
 	}
 
 sub set_title   {  $_[0]->{title} = $_[1] }
@@ -157,8 +160,9 @@ sub new {
 
 sub emit 
 	{
-	print {$_[0]->{'output_fh'}} $_[0]->{'scratch'};
-	$_[0]->clear_scratch;
+	my $pad = $_[0]->get_pad;
+	print {$_[0]->{'output_fh'}} $_[0]->{$pad};
+	$_[0]->clear_pad;
 	return;
 	}
 
@@ -175,13 +179,13 @@ sub get_pad
 sub start_Document
 	{
 	$_[0]->{in_section} = [];
-	$_[0]->add_to_scratch( $_[0]->document_header ); 
+	$_[0]->add_to_pad( $_[0]->document_header ); 
 	$_[0]->emit;
 	}
 
 sub end_Document    
 	{
-	$_[0]->add_to_scratch( $_[0]->document_footer ); 
+	$_[0]->add_to_pad( $_[0]->document_footer ); 
 	$_[0]->emit;
 	}
 
@@ -261,7 +265,7 @@ sub make_para
 	my( $self, $style, $para ) = @_;
 	
 	$self->add_xml_tag( '<para>' );
-	$self->add_to_scratch( $para );
+	$self->add_to_pad( $para );
 	$self->escape_and_emit;
 	$self->add_xml_tag( "<\para>\n\n" );
 	}
@@ -370,7 +374,7 @@ sub end_item_bullet
 	{ 	
 	my $self = shift;
 	$self->end_Para;
-#	$self->add_to_scratch( "</listitem>\n\n" );
+#	$self->add_to_pad( "</listitem>\n\n" );
 	$self->{in_item} = 0;
 	}	
 sub end_item_number { $_[0]->add_xml_tag( '</listitemnumber>' ) }
@@ -404,10 +408,9 @@ sub end_over_bullet
 	
 	my $tag = $self->{saw_exercises} ? 'orderedlist' : 'itemizedlist';
 	
-	$self->add_to_scratch( "</$tag>\n\n" );
+	$self->add_to_pad( "</$tag>\n\n" );
 	$self->end_list_level;
 	$self->emit;
-	$self->clear_scratch;
 	}
 sub end_over_text   { 
 	$_[0]->add_xml_tag( '</listitemtext>' );
