@@ -170,7 +170,9 @@ sub get_pad
 	{
 	# flow elements first
 	   if( $_[0]{module_flag}   ) { 'scratch'   }
-	elsif( $_[0]{url_flag}      ) { 'url_text'  }
+	elsif( $_[0]{in_U}      )     { 'url_text'  }
+	elsif( $_[0]{in_L}      )     { 'link_text' }
+	elsif( $_[0]{in_R}      )     { 'ref_text'  }
 	# then block elements
 	# finally the default
 	else                          { 'scratch'   }
