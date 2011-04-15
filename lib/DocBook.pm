@@ -107,7 +107,7 @@ sub document_header
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" 
 	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-<!-- created by brian's private converter @{ [ scalar localtime ] } -->
+<!-- created by brian's private converter -->
 XML
 
 	my $id = join '-', $_[0]->title, $_[0]->chapter;
