@@ -545,7 +545,13 @@ sub end_R   {
 	my $text = $_[0]->{$pad};
 	$_[0]->clear_pad;
 
-	$_[0]->add_xml_tag( qq|<xref ref="$text" />| );
+	$text = do {
+		if( $text =~ /\d/ )        { sprintf '%02d', $text }
+		elsif( $text =~ /[abc]/i ) { "app" . lc($text) }
+		};
+
+	my $link = join '-', $_[0]->title, $text;
+	$_[0]->add_xml_tag( qq|<xref linkend="$link" />| );
 	$_[0]->emit;
 	$_[0]->{in_R} = 0;
 	}
