@@ -569,7 +569,7 @@ sub handle_text
 	my( $self, $text ) = @_;
 
 	if( $text eq 'Exercises' ) {
-	print STDERR "In exercises\n";
+	#print STDERR "In exercises\n";
 		$self->{saw_exercises} = 1;
 		}
 	my $pad = $self->get_pad;
