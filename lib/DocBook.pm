@@ -432,7 +432,7 @@ sub start_table {
 
 	my $id = $self->title . '-' . $self->chapter . '-TABLE-' . ++$_[0]{'table_count'};
 	$self->add_xml_tag(
-		qq|<table id="$id" label="">\n| .
+		qq|<table id="$id">\n| .
 		qq|<title>$flags->{'title'}</title>\n| .
 		qq|<tgroup cols="2">\n|
 		);
