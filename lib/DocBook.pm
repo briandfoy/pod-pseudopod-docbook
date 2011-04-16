@@ -650,10 +650,15 @@ sub _ponder_Verbatim {
 	DEBUG and print STDERR " giving verbatim treatment...\n";
 
 	$para->[1]{'xml:space'} = 'preserve';
-	foreach my $line ( @$para[ 2 .. $#$para ] )
-		{
-		$line =~ s/^(\t|  )//gm;
-		$line =~ s/^(\t+)/" " x ( 4 * length($1) )/e
+	foreach my $line ( @$para[ 2 .. $#$para ] ) {
+		$line =~ s/\A(\t|  )//gm;
+		$line =~ s/\A(\t+)/" " x ( 4 * length($1) )/e;
+		warn
+			sprintf(
+				"%s: tab in code listing! [%s]",
+				$self->chapter,
+				$line
+				) if $line =~ /\t/;
   		}
 
   # Now the VerbatimFormatted hoodoo...
