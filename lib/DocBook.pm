@@ -597,8 +597,9 @@ sub end_R   {
 	$_[0]->clear_pad;
 
 	$text = do {
-		if( $text =~ /\d/ )        { sprintf '%02d', $text }
-		elsif( $text =~ /[abc]/i ) { "app" . lc($text) }
+		if( $text =~ /\A\d\z/ )        { sprintf '%02d', $text }
+		elsif( $text =~ /\A[abc]\z/i ) { "app" . lc($text) }
+		elsif( $text =~ /a\.(\d+)/i )  { "appa-$1" }
 		};
 
 	my $link = join '-', $_[0]->title, $text;
