@@ -1,5 +1,5 @@
 BEGIN {
-	@classes = qw(Pod::DocBook);
+	@classes = qw(Pod::PseudoPod::DocBook);
 	}
 
 use Test::More tests => scalar @classes;
