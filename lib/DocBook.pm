@@ -480,7 +480,8 @@ XML
 sub start_table {
 	my( $self, $flags ) = @_;
 
-	my $id = $self->title . '-' . $self->chapter . '-TABLE-' . ++$_[0]{'table_count'};
+	my $id = $self->title . '-' . $self->chapter .
+		'-TABLE-' . ++$_[0]{'table_count'};
 	$self->add_xml_tag(
 		qq|<table id="$id">\n| .
 		qq|<title>$flags->{'title'}</title>\n| .
