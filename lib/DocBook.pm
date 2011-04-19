@@ -155,6 +155,7 @@ use Data::Dumper;
 sub new {
 	my $self = $_[0]->SUPER::new();
 	$self->{accept_targets}{table}++;
+	$self->{accept_targets}{figure}++;
 	$self;
 	}
 
@@ -169,13 +170,14 @@ sub emit
 sub get_pad
 	{
 	# flow elements first
-	   if( $_[0]{module_flag}   ) { 'scratch'   }
-	elsif( $_[0]{in_U}      )     { 'url_text'  }
-	elsif( $_[0]{in_L}      )     { 'link_text' }
-	elsif( $_[0]{in_R}      )     { 'ref_text'  }
+	   if( $_[0]{module_flag}   ) { 'scratch'     }
+	elsif( $_[0]{in_U}      )     { 'url_text'    }
+	elsif( $_[0]{in_L}      )     { 'link_text'   }
+	elsif( $_[0]{in_R}      )     { 'ref_text'    }
+	elsif( $_[0]{in_figure} )     { 'figure_text' }
 	# then block elements
 	# finally the default
-	else                          { 'scratch'   }
+	else                          { 'scratch'     }
 	}
 
 sub start_Document
@@ -276,6 +278,8 @@ sub start_Para
 	{
 	my $self = shift;
 
+	return if $self->{in_figure};
+
 	$self->add_xml_tag( qq|<para>| );
 
 	$self->escape_and_emit;
@@ -287,16 +291,14 @@ sub end_Para
 	{
 	my $self = shift;
 
+	return if $self->{in_figure};
+
 	$self->add_xml_tag( "</para>\n\n" );
 
 	$self->end_non_code_text;
 
 	$self->{'in_para'} = 0;
 	}
-
-sub start_figure 	{ }
-
-sub end_figure      { }
 
 sub start_Verbatim
 	{
@@ -426,6 +428,54 @@ sub end_over_number {
 	$_[0]->add_xml_tag( '</listitemnumber>' );
 	$_[0]->add_xml_tag( '</itemizedlistnumber>' )
 	}
+
+sub start_figure 	{
+	my( $self, $flags ) = @_;
+	$self->{in_figure} = 1;
+	$self->{figure_title} = $flags->{title};
+
+	my $pad = $self->get_pad;
+	}
+
+=pod
+
+   <figure id="FIG3-1_ID_HERE">
+     <title>FIG3-1_TITLE_HERE</title>
+     <mediaobject>
+       <imageobject role="web">
+         <imagedata fileref="figs/web/lnp5_0301.png" format="PNG"/>
+       </imageobject>
+     </mediaobject>
+   </figure>
+
+=cut
+
+sub end_figure {
+	my( $self, $flags ) = @_;
+
+	my $id = $self->title . '-' . $self->chapter .
+		'-FIGURE-' . ++$_[0]{'figure_count'};
+	my $pad = $self->get_pad;
+	my $filename = $self->{$pad};
+	$self->clear_pad;
+	my( $format ) = map { uc } ($filename =~ /(p(?:ng|df))\z/ig);
+
+	$self->add_xml_tag( <<"XML"	);
+   <figure id="$id">
+     <title>$self->{figure_title}</title>
+     <mediaobject>
+       <imageobject role="web">
+         <imagedata fileref="$filename" format="$format"/>
+       </imageobject>
+     </mediaobject>
+   </figure>
+
+XML
+
+	$self->{figure_title} = 0;
+	$self->{in_figure} = 0;
+	}
+
 
 sub start_table {
 	my( $self, $flags ) = @_;
