@@ -610,7 +610,8 @@ sub make_curly_quotes
 	{
 	my( $self ) = @_;
 
-	my $text = $self->{scratch};
+	my $pad  = $self->get_pad;
+	my $text = $self->{$pad};
 
 	require Tie::Cycle;
 
@@ -623,20 +624,24 @@ sub make_curly_quotes
 	# worry about InDesign in the pod.
 	$text =~ s/'/&#x2019;/g;
 
-	$self->{'scratch'} = $text;
+	$self->{$pad} = $text;
 
 	return 1;
 	}
 
 sub make_em_dashes
 	{
-	$_[0]->{scratch} =~ s/--/&#x2014;/g;
+	my( $self ) = @_;
+	my $pad  = $self->get_pad;
+	$_[0]->{$pad} =~ s/--/&#x2014;/g;
 	return 1;
 	}
 
 sub make_ellipses
 	{
-	$_[0]->{scratch} =~ s/\Q.../&#x2026;/g;
+	my( $self ) = @_;
+	my $pad  = $self->get_pad;
+	$self->{$pad} =~ s/\Q.../&#x2026;/g;
 	return 1;
 	}
 
