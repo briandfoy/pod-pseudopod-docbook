@@ -597,7 +597,7 @@ sub end_R   {
 	$_[0]->clear_pad;
 
 	$text = do {
-		if( $text =~ /\A\d\z/ )        { sprintf '%02d', $text }
+		if( $text =~ /\A\d+\z/ )        { sprintf '%02d', $text }
 		elsif( $text =~ /\A[abc]\z/i ) { "app" . lc($text) }
 		elsif( $text =~ /a\.(\d+)/i )  { "appa-$1" }
 		};
