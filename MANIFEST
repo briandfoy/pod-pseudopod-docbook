@@ -1,7 +1,7 @@
 Changes
 examples/placeholder.pl
-lib/DocBook.pm
-lib/OReilly.pm
+lib/Pod/PseudoPod/DocBook.pm
+lib/Pod/PseudoPod/OReilly.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
@@ -18,6 +18,5 @@ test-corpus/clone
 test-corpus/test
 test-corpus/test.pod
 test-corpus/test.xml
-test-corpus/test.xml.debug
 test-corpus/test2
 test-corpus/test3
