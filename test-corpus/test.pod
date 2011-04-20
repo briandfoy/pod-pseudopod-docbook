@@ -22,7 +22,7 @@ This is a para with a B<bold> word. And an I<italic> word.
 	
 This is after the code. This line has some "double quotes" and the next
 line has some 'single quotes'. There is also an 
-mdash--there it is!F<This is the first footnote.>
+mdash--there it is!N<This is the first footnote.>
 
 =head2 This is the second head2
 

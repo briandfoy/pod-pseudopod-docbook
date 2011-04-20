@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" 
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 	"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<!-- created by brian's private converter -->
 <chapter id="test-title-3">
 
 <title>This is the title</title>
 <para>This para is a bit of an introduction. It goes on and on.</para>
+
 <para>This is another para in the the intro.</para>
+
 
 <sect1 id="test-title-3-1">
 <title>This is head1</title>
-<para>This is a para with a <literal moreinfo="none">single code</literal> and a <literal moreinfo="none"><$fh></literal>.</para>
+<para>This is a para with a <literal moreinfo="none">single code</literal> and a <literal moreinfo="none">&lt;$fh></literal>.</para>
+
 
 <sect2 id="test-title-3-1-1">
 <title>This is the first head2</title>
-<para>This is a para with a <emphasis>bold</emphasis> word.</para>
-<programlisting format="linespecific" id="I_programlisting3_tt1" xml:space="preserve">#!/usr/bin/perl
+<para>This is a para with a <command>bold</command> word. And an <emphasis>italic</emphasis> word.</para>
+
+
+<programlisting format="linespecific" id="I_programlisting_3_tt1" xml:space="preserve">#!/usr/bin/perl
 use strict;
 use warnings;
 
 use Some::Module;
 
 unlink $file;</programlisting>
-<para>This is after the code.</para>
+
+<para>This is after the code. This line has some &#x201C;double quotes&#x201D; and the next line has some &#x2019;single quotes&#x2019;. There is also an mdash&#x2014;there it is!<footnote id="footnote-test-title-3-0"><para>This is the first footnote.</para></footnote></para>
+
 </sect2>
 
 <sect2 id="test-title-3-1-2">
 <title>This is the second head2</title>
 <para>This is a para.</para>
+
 </sect2>
 </sect1>
 
@@ -34,30 +43,32 @@ unlink $file;</programlisting>
 <title>This is another head1</title>
 <para>This is the last line.</para>
 
-<itemizedlist>
-
-<listitem>
+<itemizedlist><listitem>
 <para>This is an item</para>
+
 </listitem>
 
 <listitem>
 <para>This is an item 2</para>
+
 </listitem>
 
 </itemizedlist>
 
 <para>Now for a list with paras in it.</para>
 
-<itemizedlist>
-
-<listitem>
+<itemizedlist><listitem>
 <para>This is an item with a para</para>
-<para>No we are in a para in a list.</para>
+
+<para>No we are in a para in a list<filename>This is the second footnote.</filename>.</para>
+
 </listitem>
 
 <listitem>
 <para>This is an item 2</para>
-<para>No we are in a para in a list.</para>
+
+<para>No we are in a para in a list<filename>This is the third footnote.</filename>.</para>
+
 </listitem>
 
 </itemizedlist>
