@@ -20,7 +20,7 @@ Pod::PseudoPod::DocBook - Turn Pod into DocBook
 
 =head1 SYNOPSIS
 
-	use Pod::DocBook;
+	use Pod::PseudoPod::DocBook;
 
 =head1 DESCRIPTION
 

@@ -16,7 +16,7 @@ Pod::PseudoPod::DocBook::OReilly - Turn Pod into O'Reilly's DocBook
 
 =head1 SYNOPSIS
 
-	use Pod::DocBook::OReilly;
+	use Pod::PseudoPod::DocBook::OReilly;
 
 =head1 DESCRIPTION
 
@@ -46,7 +46,7 @@ can override those in a subclass.
 
 =head1 SEE ALSO
 
-L<Pod::PseudoPod>, L<Pod::Simple>
+L<Pod::PseudoPod>, L<Pod::PseudoPod::DocBook>, L<Pod::Simple>
 
 =head1 SOURCE AVAILABILITY
 
