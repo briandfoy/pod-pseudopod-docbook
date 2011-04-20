@@ -21,3 +21,4 @@ t/cover_db*
 \.svnignore
 \.git
 Pod-
+debug\z
