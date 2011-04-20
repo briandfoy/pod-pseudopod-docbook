@@ -12,7 +12,6 @@ my @files = glob( '*.pod' );
 chdir '..';
 print STDERR "Found @files\n";
 
-foreach my $file ( @files )
-	{
+foreach my $file ( @files ) {
 	transform_file( $file );
 	}
