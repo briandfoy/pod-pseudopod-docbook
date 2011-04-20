@@ -1,6 +1,6 @@
 use Test::LongString;
 
-my $class = 'Pod::DocBook';
+my $class = 'Pod::PseudoPod::DocBook';
 use_ok( $class );
 
 my $input_dir = 'test-corpus';
