@@ -1,4 +1,4 @@
-# Changes for Pod::Pseudopod::DocBook
+Revision history for Perl module Pod::Pseudopod::DocBook
 
 0.10 - Wed Apr 20 21:26:35 2011
 	* Rename to Pod::PseudoPod::DocBook
