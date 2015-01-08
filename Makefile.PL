@@ -2,21 +2,48 @@ require 5.008;
 use strict;
 use warnings;
 
+use File::Spec::Functions qw(catfile);
 
-my $github    = 'https://github.com/briandfoy/';
-my $main_file = 'lib/Pod/PseudoPod/DocBook.pm';
+my $module    = 'Pod::PseudoPod::DocBook';
+my $github    = 'https://github.com/briandfoy/pod-pseudopod-docbook';
+my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
 my %WriteMakefile = (
-	'NAME'	        => 'Pod::PseudoPod::DocBook',
+	'NAME'	        => $module,
 	'ABSTRACT_FROM' => $main_file,
 	'VERSION_FROM'  => $main_file,
 	'LICENSE'       => 'perl',
 	'AUTHOR'        => 'brian d foy <bdfoy@cpan.org>',
-	
-	'PREREQ_PM'    => { 
-		'Pod::PseudoPod'   => '0',
+
+	'CONFIGURE_REQUIRES' => {
+		'ExtUtils::MakeMaker' => '6.64',
+		},
+
+	'BUILD_REQUIRES' => {
+		},
+
+	'TEST_REQUIRES' => {
+		'Test::More'       => '0.94',
 		'Test::LongString' => '0',
-		'Test::More'       => '0',
+		},
+
+	'PREREQ_PM'     => {
+		'Pod::PseudoPod'   => '0',
+		},
+
+	'META_MERGE' => {
+		'meta-spec' => { version => 2 },
+		resources => {
+			repository => {
+				type => 'git',
+				url  => "$github.git",
+				web  => $github,
+				},
+			bugtraker => {
+				web    => "$github/issues",
+				},
+			homepage => $github,
+			},
 		},
 
 	clean  => { FILES    => q|Pod-DocBook-*| },
