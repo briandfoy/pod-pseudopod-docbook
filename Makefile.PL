@@ -49,7 +49,7 @@ my %WriteMakefile = (
 			},
 		},
 
-	clean  => { FILES    => q|Pod-DocBook-*| },
+	clean  => { FILES    => "$dist-*" },
 	);
 
 sub arguments { \%WriteMakefile }
