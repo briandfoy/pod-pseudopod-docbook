@@ -5,6 +5,8 @@ use warnings;
 use File::Spec::Functions qw(catfile);
 
 my $module    = 'Pod::PseudoPod::DocBook';
+( my $dist = $module ) =~ s/::/-/g;
+
 my $github    = 'https://github.com/briandfoy/pod-pseudopod-docbook';
 my $main_file = catfile( 'lib', split /::/, "$module.pm" );
 
