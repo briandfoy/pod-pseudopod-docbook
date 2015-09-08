@@ -10,6 +10,8 @@ use vars qw($VERSION);
 
 $VERSION = '0.13';
 
+=encoding utf8
+
 =head1 NAME
 
 Pod::PseudoPod::DocBook::OReilly - Turn Pod into O'Reilly's DocBook

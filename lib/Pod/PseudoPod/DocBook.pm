@@ -14,6 +14,8 @@ $VERSION = '0.10';
 
 sub DEBUG () { 0 }
 
+=encoding utf8
+
 =head1 NAME
 
 Pod::PseudoPod::DocBook - Turn Pod into DocBook
