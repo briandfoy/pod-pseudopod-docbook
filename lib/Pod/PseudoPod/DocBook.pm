@@ -10,7 +10,7 @@ use vars qw($VERSION);
 
 use Carp;
 
-$VERSION = '0.10';
+$VERSION = '0.101';
 
 sub DEBUG () { 0 }
 
