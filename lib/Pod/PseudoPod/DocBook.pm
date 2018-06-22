@@ -810,10 +810,7 @@ L<Pod::PseudoPod>, L<Pod::Simple>
 
 This source is in Github:
 
-	http://github.com/briandfoy/Pod-DocBook
-
-If, for some reason, I disappear from the world, one of the other
-members of the project can shepherd this module appropriately.
+	https://github.com/briandfoy/pod-pseudopod-docbook
 
 =head1 AUTHOR
 
