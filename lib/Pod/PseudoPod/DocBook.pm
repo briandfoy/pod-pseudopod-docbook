@@ -6,11 +6,10 @@ use warnings;
 no warnings;
 
 use subs qw();
-use vars qw($VERSION);
 
 use Carp;
 
-$VERSION = '0.101';
+our $VERSION = '0.101';
 
 sub DEBUG () { 0 }
 
