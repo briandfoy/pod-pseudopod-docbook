@@ -67,6 +67,9 @@ my %WriteMakefile = (
 
 	'PREREQ_PM'     => {
 		'Pod::PseudoPod'   => '0',
+		'Tie::Cycle'       => '0',
+		'Carp'             => '0',
+		'Data::Dumper'     => '0',
 		},
 
 	'META_MERGE' => {
