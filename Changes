@@ -1,5 +1,8 @@
 Revision history for Perl module Pod::Pseudopod::DocBook
 
+0.101 2018-06-22T15:13:49Z
+	* Clarify that it's the Artistic License 2.0
+
 0.10 - 2011-04-20
 	* Rename to Pod::PseudoPod::DocBook
 	* Handle tables, figures, and xrefs
