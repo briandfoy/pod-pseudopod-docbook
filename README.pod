@@ -32,17 +32,8 @@ name instead of the file location:
 
 	% perldoc Pod::PseudoPod::DocBook
 
-You can read the documentation and inspect the meta data on one of the 
-CPAN web interfaces, such as L<CPAN Search|http://search.cpan.org/dist/Pod-PseudoPod-DocBook> or 
-L<MetaCPAN|http://www.metacpan.org/module/Pod::PseudoPod::DocBook>:
-
-=over 4
-
-=item *	L<http://search.cpan.org/dist/Pod-PseudoPod-DocBook>
-
-=item *	L<http://www.metacpan.org/module/Pod::PseudoPod::DocBook>
-
-=back
+You can read the documentation and inspect the meta data on
+L<MetaCPAN|http://www.metacpan.org/module/Pod::PseudoPod::DocBook>.
 
 The standard module documentation has example uses in the SYNOPSIS
 section, but you can also look in the I<examples/> directory (if it's
