@@ -10,7 +10,7 @@
 
 =for HTML <a href="https://github.com/briandfoy/pod-pseudopod-docbook/blob/master/LICENSE"><img src="https://img.shields.io/cpan/l/Pod-PseudoPod-DocBook.svg" /></a>
 
-=for HTML <a href="http://www.metacpan.org/module/Pod::PseudoPod::DocBook"><img src="https://img.shields.io/cpan/v/Pod-PseudoPod-DocBook.svg" /></A>
+=for HTML <a href="https://metacpan.org/pod/Pod::PseudoPod::DocBook"><img src="https://img.shields.io/cpan/v/Pod-PseudoPod-DocBook.svg" /></A>
 
 =head1 The Pod::PseudoPod::DocBook module
 
@@ -23,7 +23,7 @@ for any Perl module.
 
 To read about L<Pod::PseudoPod::DocBook>, look at the embedded documentation
 in the module itself. Inside the distribution, you can format it
-with L<perldoc|http://perldoc.perl.org/perldoc.html>:
+with L<perldoc|https://perldoc.perl.orgperldoc.html>:
 
 	% perldoc lib/Pod/PseudoPod/DocBook.pm
 
@@ -33,7 +33,7 @@ name instead of the file location:
 	% perldoc Pod::PseudoPod::DocBook
 
 You can read the documentation and inspect the meta data on
-L<MetaCPAN|http://www.metacpan.org/module/Pod::PseudoPod::DocBook>.
+L<MetaCPAN|https://metacpan.org/pod/Pod::PseudoPod::DocBook>.
 
 The standard module documentation has example uses in the SYNOPSIS
 section, but you can also look in the I<examples/> directory (if it's
