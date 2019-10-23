@@ -1,4 +1,4 @@
-=head0 This is the title
+=head1 This is the title
 
 This para is a bit of an introduction. It goes on and on.
 
