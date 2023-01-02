@@ -1,5 +1,5 @@
 # brian's standard GitHub Actions Ubuntu config for Perl 5 modules
-# version 20220825.001
+# version 20220902.001
 # https://github.com/briandfoy/github_workflows
 # https://github.com/features/actions
 # This file is licensed under the Artistic License 2.0
@@ -9,9 +9,12 @@ on:
     push:
         branches:
             - '**'
-            - '!**windows**'
+            - '!**appveyor**'
+            - '!**circleci**'
             - '!**macos**'
+            - '!**notest**'
             - '!**release**'
+            - '!**windows**'
         tags-ignore:
             # I tag release pushes but those should have already been tested
             - 'release-*'
@@ -19,10 +22,11 @@ on:
             # list all the files which are irrelevant to the tests
             # non-code, support files, docs, etc
             - '.appveyor.yml'
+            - '.circleci'
             - '.gitattributes'
             - '.github/workflows/macos.yml'
-            - '.github/workflows/windows.yml'
             - '.github/workflows/release.yml'
+            - '.github/workflows/windows.yml'
             - '.gitignore'
             - '.releaserc'
             - 'Changes'
@@ -56,7 +60,7 @@ jobs:
         container:
             image: perl:${{ matrix.perl-version }}
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Platform check
               run: uname -a
             - name: Perl version check
