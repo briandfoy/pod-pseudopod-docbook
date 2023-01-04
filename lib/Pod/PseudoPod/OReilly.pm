@@ -54,7 +54,7 @@ L<Pod::PseudoPod>, L<Pod::PseudoPod::DocBook>, L<Pod::Simple>
 
 This source is in Github:
 
-	http://github.com/briandfoy/Pod-WordML
+	https://github.com/briandfoy/pod-pseudopod-docbook
 
 If, for some reason, I disappear from the world, one of the other
 members of the project can shepherd this module appropriately.
@@ -65,7 +65,7 @@ brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright © 2009-2021, brian d foy <bdfoy@cpan.org>. All rights reserved.
+Copyright © 2009-2023, brian d foy <bdfoy@cpan.org>. All rights reserved.
 
 You may redistribute this under the same terms as Perl itself.
 

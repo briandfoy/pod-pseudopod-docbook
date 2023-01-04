@@ -5,7 +5,7 @@ use base 'Pod::PseudoPod';
 use warnings;
 no warnings;
 
-use subs qw();
+use subs qw(DEBUG);
 
 use Carp;
 
@@ -41,10 +41,7 @@ can override those in a subclass.
 
 =over 4
 
-=item document_header
-
-This is the start of the document that defines all of the styles. You'll need
-to override this. You can take this directly from
+=item * add_xml_tag
 
 =cut
 
@@ -56,6 +53,10 @@ sub add_xml_tag
 	$self->emit;
 	}
 
+=item * add_data
+
+=cut
+
 sub add_data
 	{
 	my( $self, $stuff ) = @_;
@@ -63,6 +64,10 @@ sub add_data
 	$self->add_to_pad( $stuff );
 	$self->escape_and_emit;
 	}
+
+=item * escape_and_emit
+
+=cut
 
 sub escape_and_emit
 	{
@@ -79,12 +84,20 @@ sub escape_and_emit
 	$self->emit;
 	}
 
+=item * add_to_pad
+
+=cut
+
 sub add_to_pad
 	{
 	my( $self, $stuff ) = @_;
 	my $pad = $self->get_pad;
 	$self->{$pad} .= $stuff;
 	}
+
+=item * clear_pad
+
+=cut
 
 sub clear_pad
 	{
@@ -94,13 +107,45 @@ sub clear_pad
 	$self->{$pad} = '';
 	}
 
+=item * set_title
+
+=cut
+
 sub set_title   {  $_[0]->{title} = $_[1] }
+
+=item * set_chapter
+
+=cut
+
 sub set_chapter {  $_[0]->{chapter} = $_[1] }
 
+=item * title
+
+=cut
+
 sub title      { $_[0]->{title}      }
+
+=item * chapter
+
+=cut
+
 sub chapter    { $_[0]->{chapter}    }
+
+=item * section
+
+=cut
+
 sub section    { $_[0]->{section}    }
+
+=item * subsection
+
+=cut
+
 sub subsection { $_[0]->{subsection} }
+
+=item * document_header
+
+=cut
 
 sub document_header
 	{
@@ -126,7 +171,7 @@ XML
 XML
 	}
 
-=item document_footer
+=item * document_footer
 
 =cut
 
@@ -150,15 +195,28 @@ XML
 
 Everything else is the same stuff from C<Pod::Simple>.
 
+=over 4
+
 =cut
 
 use Data::Dumper;
+
+=item * new
+
+=cut
+
 sub new {
 	my $self = $_[0]->SUPER::new();
 	$self->{accept_targets}{table}++;
 	$self->{accept_targets}{figure}++;
 	$self;
 	}
+
+=item * emit
+
+Transfer text from the pad to the output
+
+=cut
 
 sub emit
 	{
@@ -167,6 +225,12 @@ sub emit
 	$_[0]->clear_pad;
 	return;
 	}
+
+=item * get_pad
+
+Return the name of the pad to use based on current state
+
+=cut
 
 sub get_pad
 	{
@@ -181,6 +245,12 @@ sub get_pad
 	else                          { 'scratch'     }
 	}
 
+=item * start_Document
+
+Start the document
+
+=cut
+
 sub start_Document
 	{
 	$_[0]->{in_section} = [];
@@ -188,11 +258,21 @@ sub start_Document
 	$_[0]->emit;
 	}
 
+=item * end_Document
+
+End the document
+
+=cut
+
 sub end_Document
 	{
 	$_[0]->add_to_pad( $_[0]->document_footer );
 	$_[0]->emit;
 	}
+
+=item * _header_start
+
+=cut
 
 sub _header_start
 	{
@@ -226,6 +306,10 @@ sub _header_start
 	$self->add_xml_tag( qq|<title>| );
 	}
 
+=item * _header_end
+
+=cut
+
 sub _header_end
 	{
 	my( $self, $level ) = @_;
@@ -233,6 +317,30 @@ sub _header_end
 
 	$self->add_xml_tag( "</title>\n" );
 	}
+
+=item * start_head0
+
+=item * start_head1
+
+=item * start_head2
+
+=item * start_head3
+
+=item * start_head4
+
+=item * end_head0
+
+=item * end_head1
+
+=item * end_head2
+
+=item * end_head3
+
+=item * end_head4
+
+Start or end a heading level
+
+=cut
 
 sub start_head0     { $_[0]->_header_start( 0 ); }
 sub end_head0       { $_[0]->_header_end( 0 );   }
@@ -256,6 +364,10 @@ sub start_head3     { $_[0]->_header_start( 3 ); }
 sub end_head3       { $_[0]->_header_end( 3 );   }
 
 
+=item * end_non_code_text
+
+=cut
+
 sub end_non_code_text
 	{
 	my $self = shift;
@@ -264,6 +376,10 @@ sub end_non_code_text
 
 	$self->emit;
 	}
+
+=item * make_para
+
+=cut
 
 sub make_para
 	{
@@ -274,6 +390,10 @@ sub make_para
 	$self->escape_and_emit;
 	$self->add_xml_tag( "<\para>\n\n" );
 	}
+
+=item * start_Para
+
+=cut
 
 sub start_Para
 	{
@@ -288,6 +408,10 @@ sub start_Para
 	$self->{'in_para'} = 1;
 	}
 
+=item * end_Para
+
+=cut
+
 sub end_Para
 	{
 	my $self = shift;
@@ -301,6 +425,10 @@ sub end_Para
 	$self->{'in_para'} = 0;
 	}
 
+=item * start_Verbatim
+
+=cut
+
 sub start_Verbatim
 	{
 	$_[0]{'in_verbatim'} = 1;
@@ -310,6 +438,10 @@ sub start_Verbatim
 	$_[0]->add_xml_tag( qq|\n<programlisting format="linespecific" id="I_programlisting_${chapter}_tt${sequence}" xml:space="preserve">| );
 	$_[0]->emit;
 	}
+
+=item * end_Verbatim
+
+=cut
 
 sub end_Verbatim
 	{
@@ -323,6 +455,10 @@ sub end_Verbatim
 	$self->{'in_verbatim'} = 0;
 	}
 
+=item * _get_initial_item_type
+
+=cut
+
 sub _get_initial_item_type
 	{
 	my $self = shift;
@@ -333,15 +469,37 @@ sub _get_initial_item_type
 	}
 
 
+=item * not_implemented
+
+=cut
+
 sub not_implemented { croak "Not implemented! " . (caller(1))[3] }
 
+=item * in_item_list
+
+=cut
+
 sub in_item_list { scalar @{ $_[0]->{list_levels} } }
+
+=item * add_list_level_item
+
+=cut
+
 sub add_list_level_item {
 	${ $_[0]->{list_levels} }[-1]{item_count}++;
 	}
+
+=item * is_first_list_level_item
+
+=cut
+
 sub is_first_list_level_item {
 	${ $_[0]->{list_levels} }[-1]{item_count} == 0;
 	}
+
+=item * start_list_level
+
+=cut
 
 sub start_list_level
 	{
@@ -350,12 +508,20 @@ sub start_list_level
 	push @{ $self->{list_levels} }, { item_count => 0 };
 	}
 
+=item * end_list_level
+
+=cut
+
 sub end_list_level
 	{
 	my $self = shift;
 
 	pop @{ $self->{list_levels} };
 	}
+
+=item * start_item_bullet
+
+=cut
 
 sub start_item_bullet
 	{
@@ -369,11 +535,29 @@ sub start_item_bullet
 	$self->start_Para;
 	}
 
+=item * start_item_number
+
+=cut
+
 sub start_item_number {
 	$_[0]->add_xml_tag( '<listitemnumber>' )
 	}
+
+=item * start_item_block
+
+=cut
+
 sub start_item_block  { $_[0]->add_xml_tag( '<listitemblock>' ) }
+
+=item * start_item_text
+
+=cut
+
 sub start_item_text   { $_[0]->add_xml_tag( '<listitemtext>' ) }
+
+=item * end_item_bullet
+
+=cut
 
 sub end_item_bullet
 	{
@@ -382,9 +566,28 @@ sub end_item_bullet
 #	$self->add_to_pad( "</listitem>\n\n" );
 	$self->{in_item} = 0;
 	}
+
+=item * end_item_number
+
+=cut
+
 sub end_item_number { $_[0]->add_xml_tag( '</listitemnumber>' ) }
+
+=item * end_item_block
+
+=cut
+
 sub end_item_block  { $_[0]->add_xml_tag( '</listitemblock>' ) }
+
+=item * end_item_text
+
+=cut
+
 sub end_item_text   { $_[0]->add_xml_tag( '</listitemtext>' ) }
+
+=item * start_over_bullet
+
+=cut
 
 sub start_over_bullet
 	{
@@ -399,9 +602,28 @@ sub start_over_bullet
 	$self->start_list_level;
 
 	}
+
+=item * start_over_text
+
+=cut
+
 sub start_over_text   { $_[0]->add_xml_tag( '<itemizedlist-text>' ) }
+
+=item * start_over_block
+
+=cut
+
 sub start_over_block  { $_[0]->add_xml_tag( '<itemizedlist-block>' ) }
+
+=item * start_over_number
+
+=cut
+
 sub start_over_number { $_[0]->add_xml_tag( '<itemizedlist-number>' ) }
+
+=item * end_over_bullet
+
+=cut
 
 sub end_over_bullet
 	{
@@ -417,18 +639,37 @@ sub end_over_bullet
 	$self->end_list_level;
 	$self->emit;
 	}
+
+=item * end_over_text
+
+=cut
+
 sub end_over_text   {
 	$_[0]->add_xml_tag( '</listitemtext>' );
 	$_[0]->add_xml_tag( '</itemizedlisttext>' )
 	}
+
+=item * end_over_block
+
+=cut
+
 sub end_over_block  {
 	$_[0]->add_xml_tag( '</listitemblock>' );
 	$_[0]->add_xml_tag( '</itemizedlistblock>' )
 	}
+
+=item * end_over_number
+
+=cut
+
 sub end_over_number {
 	$_[0]->add_xml_tag( '</listitemnumber>' );
 	$_[0]->add_xml_tag( '</itemizedlistnumber>' )
 	}
+
+=item * start_figure
+
+=cut
 
 sub start_figure 	{
 	my( $self, $flags ) = @_;
@@ -438,7 +679,7 @@ sub start_figure 	{
 	my $pad = $self->get_pad;
 	}
 
-=pod
+=begin comment
 
    <figure id="FIG3-1_ID_HERE">
      <title>FIG3-1_TITLE_HERE</title>
@@ -448,6 +689,12 @@ sub start_figure 	{
        </imageobject>
      </mediaobject>
    </figure>
+
+=end comment
+
+=cut
+
+=item * end_figure
 
 =cut
 
@@ -477,6 +724,9 @@ XML
 	$self->{in_figure} = 0;
 	}
 
+=item * start_table
+
+=cut
 
 sub start_table {
 	my( $self, $flags ) = @_;
@@ -490,19 +740,36 @@ sub start_table {
 		);
 	}
 
+=item * end_table
+
+=cut
+
 sub end_table      {
 	$_[0]{'in_bodyrow'} = 0;
 	$_[0]->{rows} = 0;
 	$_[0]->add_xml_tag( "</tbody></tgroup></table>\n" );
 	}
 
+=item * start_headrow
+
+=cut
+
 sub start_headrow  {
 	$_[0]{'in_headrow'} = 1;
 	$_[0]{'in_bodyrow'} = 0;
 	}
+
+=item * start_bodyrows
+
+=cut
+
 sub start_bodyrows {
 	$_[0]{'in_bodyrow'} = 1;
 	}
+
+=item * start_row
+
+=cut
 
 sub start_row {
 	$_[0]->{rows}++;
@@ -511,30 +778,88 @@ sub start_row {
 
 	$_[0]->add_xml_tag( qq(<row>\n) );
 	}
+
+=item * end_row
+
+=cut
+
 sub end_row {
 	$_[0]->add_xml_tag( qq(</row>\n) );
 	if( $_[0]{'in_bodyrow'} and $_[0]{'in_headrow'} ) { $_[0]->add_xml_tag( qq(</thead>\n<tbody>\n) ); $_[0]{'in_headrow'}=0; }
 	}
 
-sub start_cell { $_[0]->add_xml_tag( qq(\t<entry align="left" valign="top">) ) }
-sub end_cell   { $_[0]->add_xml_tag( qq(</entry>\n) )
-}
+=item * start_cell
 
+Start a table cell
+
+=cut
+
+sub start_cell { $_[0]->add_xml_tag( qq(\t<entry align="left" valign="top">) ) }
+
+=item * end_cell
+
+End a table cell
+
+=cut
+
+sub end_cell   { $_[0]->add_xml_tag( qq(</entry>\n) ) }
+
+
+=item * end_B
+
+End a C<< B<> >> sequence
+
+=cut
 
 sub end_B   { $_[0]->add_xml_tag( '</command>' ); $_[0]->{in_B} = 0; }
+
+
+=item * start_B
+
+Start a C<< B<> >> sequence
+
+=cut
+
 sub start_B
 	{
 	$_[0]->add_xml_tag( '<command>' );
 	$_[0]->{in_B} = 1;
 	}
 
+=item * end_C
+
+=cut
+
 sub end_C   { $_[0]->add_xml_tag( '</literal>' ); $_[0]->{in_C} = 0; }
+
+=item * start_C
+
+=cut
+
 sub start_C { $_[0]->add_xml_tag( '<literal moreinfo="none">' ); $_[0]->{in_C} = 1; }
 
+=item * end_F
+
+=cut
+
 sub end_F   { $_[0]->add_xml_tag( '</filename>' ) }
+
+=item * start_F
+
+=cut
+
 sub start_F { $_[0]->add_xml_tag( '<filename>' )  }
 
+=item * end_I
+
+=cut
+
 sub end_I   { $_[0]->add_xml_tag( '</emphasis>' ) }
+
+=item * start_I
+
+=cut
+
 sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
 
 =pod
@@ -548,6 +873,10 @@ sub start_I { $_[0]->add_xml_tag( '<emphasis>' )  }
 <ulink role="orm:hideurl"
 url="http://www.guardian.co.uk/film/2006/
 sep/22/londonfilmfestival2006.londonfilmfestival">Automavision</ulink>
+=cut
+
+=item * end_L
+
 =cut
 
 sub end_L   {
@@ -565,11 +894,18 @@ sub end_L   {
 	$_[0]->{in_L} = 0;
 	}
 
+=item * start_L
+
+=cut
+
 sub start_L {
 	$_[0]->emit;
 	$_[0]->{in_L} = 1;
 	}
 
+=item * start_M
+
+=cut
 
 sub start_M
 	{
@@ -578,20 +914,42 @@ sub start_M
 	$_[0]->start_C;
 	}
 
+=item * end_M
+
+=cut
+
 sub end_M
 	{
 	$_[0]->end_C;
 	$_[0]{'module_flag'} = 0;
 	}
 
+=item * end_N
+
+=cut
+
 sub end_N   { $_[0]->add_xml_tag( '</para></footnote>' ); $_[0]->{in_N} = 0; }
+
+=item * start_N
+
+=cut
+
 sub start_N {
 	$_[0]->{in_N} = 1;
 	my $id = join '-', 'footnote', $_[0]->title, $_[0]->chapter, $_[0]->{footnote}++;
 	$_[0]->add_xml_tag( qq|<footnote id="$id"><para>| );
 	}
 
+=item * start_R
+
+=cut
+
 sub start_R { $_[0]->emit; $_[0]->{in_R} = 1 }
+
+=item * end_R
+
+=cut
+
 sub end_R   {
 	my $pad = $_[0]->get_pad;
 	my $text = $_[0]->{$pad};
@@ -609,10 +967,28 @@ sub end_R   {
 	$_[0]->{in_R} = 0;
 	}
 
+=item * start_T
+
+=cut
+
 sub start_T { $_[0]->add_xml_tag( '<citetitle>' )  }
+
+=item * end_T
+
+=cut
+
 sub end_T   { $_[0]->add_xml_tag( '</citetitle>' ) }
 
+=item * start_U
+
+=cut
+
 sub start_U { $_[0]->emit; $_[0]->{in_U} = 1 }
+
+=item * end_U
+
+=cut
+
 sub end_U   {
 	my $pad = $_[0]->get_pad;
 	my $text = $_[0]->{$pad};
@@ -622,6 +998,10 @@ sub end_U   {
 	$_[0]->emit;
 	$_[0]->{in_U} = 0;
 	}
+
+=item * handle_text
+
+=cut
 
 sub handle_text
 	{
@@ -644,10 +1024,22 @@ sub handle_text
 		}
 	}
 
+=item * dont_escape
+
+Return true if we are in a context where we shouldn't escape text
+
+=cut
+
 sub dont_escape {
 	my $self = shift;
 	$self->{in_verbatim} || $self->{in_C}
 	}
+
+=item * escape_text
+
+Escape C<&> and C<< < >>
+
+=cut
 
 sub escape_text
 	{
@@ -658,6 +1050,10 @@ sub escape_text
 
 	return 1;
 	}
+
+=item * make_curly_quotes
+
+=cut
 
 sub make_curly_quotes
 	{
@@ -682,6 +1078,12 @@ sub make_curly_quotes
 	return 1;
 	}
 
+=item * make_em_dashes
+
+Take the pad value and translate -- to em dashes
+
+=cut
+
 sub make_em_dashes
 	{
 	my( $self ) = @_;
@@ -689,6 +1091,12 @@ sub make_em_dashes
 	$_[0]->{$pad} =~ s/--/&#x2014;/g;
 	return 1;
 	}
+
+=item * make_ellipses
+
+Take the pad value and translate ... to ellipses
+
+=cut
 
 sub make_ellipses
 	{
@@ -699,13 +1107,15 @@ sub make_ellipses
 	}
 
 BEGIN {
-require Pod::Simple::BlackBox;
+use Pod::Simple::BlackBox;
 
 package Pod::Simple::BlackBox;
 
+no warnings qw(redefine);
+
 sub _ponder_Verbatim {
 	my ($self,$para) = @_;
-	DEBUG and print STDERR " giving verbatim treatment...\n";
+	DEBUG() and print STDERR " giving verbatim treatment...\n";
 
 	$para->[1]{'xml:space'} = 'preserve';
 	foreach my $line ( @$para[ 2 .. $#$para ] ) {
@@ -745,6 +1155,7 @@ sub _ponder_Verbatim {
 BEGIN {
 
 # override _treat_Es so I can localize e2char
+
 sub _treat_Es
 	{
 	my $self = shift;
@@ -754,6 +1165,10 @@ sub _treat_Es
 
 	$self->SUPER::_treat_Es( @_ );
 	}
+
+=item * e2char_tagged_text
+
+=cut
 
 sub e2char_tagged_text
 	{
@@ -798,6 +1213,8 @@ sub e2char_tagged_text
 	}
 }
 
+=back
+
 =head1 TO DO
 
 
@@ -817,7 +1234,7 @@ brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright © 2010-2021, brian d foy <bdfoy@cpan.org>. All rights reserved.
+Copyright © 2010-2023, brian d foy <bdfoy@cpan.org>. All rights reserved.
 
 You may redistribute this under the terms of the Artistic License 2.0.
 
@@ -848,7 +1265,7 @@ sub _ponder_paragraph_buffer {
   return unless @{$paras = $self->{'paras'}};
   my $curr_open = ($self->{'curr_open'} ||= []);
 
-  DEBUG > 10 and print "# Paragraph buffer: <<", pretty($paras), ">>\n";
+  DEBUG() > 10 and print "# Paragraph buffer: <<", pretty($paras), ">>\n";
 
   # We have something in our buffer.  So apparently the document has started.
   unless($self->{'doc_has_started'}) {
@@ -862,7 +1279,7 @@ sub _ponder_paragraph_buffer {
         # i.e., if the paras is all ~ends
      )
     ;
-    DEBUG and print "# Starting ",
+    DEBUG() and print "# Starting ",
       $starting_contentless ? 'contentless' : 'contentful',
       " document\n"
     ;
@@ -893,7 +1310,7 @@ sub _ponder_paragraph_buffer {
     $para = shift @$paras;
     $para_type = $para->[0];
 
-    DEBUG > 1 and print "Pondering a $para_type paragraph, given the stack: (",
+    DEBUG() > 1 and print "Pondering a $para_type paragraph, given the stack: (",
       $self->_dump_curr_open(), ")\n";
 
     if($para_type eq '=for') {
@@ -910,7 +1327,7 @@ sub _ponder_paragraph_buffer {
     # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     if(grep $_->[1]{'~ignore'}, @$curr_open) {
-      DEBUG > 1 and
+      DEBUG() > 1 and
        print "Skipping $para_type paragraph because in ignore mode.\n";
       next;
     }
@@ -939,7 +1356,7 @@ sub _ponder_paragraph_buffer {
       #  mean how it should get treated, not as what the element name
       #  should be.
 
-      DEBUG > 1 and print "Pondering non-magical $para_type\n";
+      DEBUG() > 1 and print "Pondering non-magical $para_type\n";
 
       # In tables, the start of a headrow or bodyrow also terminates an
       # existing open row.
@@ -953,7 +1370,7 @@ sub _ponder_paragraph_buffer {
          and @$curr_open
          and $curr_open->[-1][0] eq '=over'
       ) {
-        DEBUG > 2 and print "'=$para_type' inside an '=over'!\n";
+        DEBUG() > 2 and print "'=$para_type' inside an '=over'!\n";
         $self->whine(
           $para->[1]{'start_line'},
           "You forgot a '=back' before '$para_type'"
@@ -989,10 +1406,10 @@ sub _ponder_paragraph_buffer {
       } elsif( $para_type =~ s/^=//s
         and defined( $para_type = $self->{'accept_directives'}{$para_type} )
       ) {
-        DEBUG > 1 and print " Pondering known directive ${$para}[0] as $para_type\n";
+        DEBUG() > 1 and print " Pondering known directive ${$para}[0] as $para_type\n";
       } else {
         # An unknown directive!
-        DEBUG > 1 and printf "Unhandled directive %s (Handled: %s)\n",
+        DEBUG() > 1 and printf "Unhandled directive %s (Handled: %s)\n",
          $para->[0], join(' ', sort keys %{$self->{'accept_directives'}} )
         ;
         $self->whine(
@@ -1006,14 +1423,14 @@ sub _ponder_paragraph_buffer {
 
       if($para_type =~ s/^\?//s) {
         if(! @$curr_open) {  # usual case
-          DEBUG and print "Treating $para_type paragraph as such because stack is empty.\n";
+          DEBUG() and print "Treating $para_type paragraph as such because stack is empty.\n";
         } else {
           my @fors = grep $_->[0] eq '=for', @$curr_open;
-          DEBUG > 1 and print "Containing fors: ",
+          DEBUG() > 1 and print "Containing fors: ",
             join(',', map $_->[1]{'target'}, @fors), "\n";
 
           if(! @fors) {
-            DEBUG and print "Treating $para_type paragraph as such because stack has no =for's\n";
+            DEBUG() and print "Treating $para_type paragraph as such because stack has no =for's\n";
 
           #} elsif(grep $_->[1]{'~resolve'}, @fors) {
           #} elsif(not grep !$_->[1]{'~resolve'}, @fors) {
@@ -1021,14 +1438,14 @@ sub _ponder_paragraph_buffer {
             # Look to the immediately containing for
 
             if($para_type eq 'Data') {
-              DEBUG and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+              DEBUG() and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
               $para->[0] = 'Para';
               $para_type = 'Plain';
             } else {
-              DEBUG and print "Treating $para_type paragraph as such because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+              DEBUG() and print "Treating $para_type paragraph as such because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
             }
           } else {
-            DEBUG and print "Treating $para_type paragraph as Data because the containing =for ($fors[-1][1]{'target'}) is a non-resolver\n";
+            DEBUG() and print "Treating $para_type paragraph as Data because the containing =for ($fors[-1][1]{'target'}) is a non-resolver\n";
             $para->[0] = $para_type = 'Data';
           }
         }
@@ -1049,7 +1466,7 @@ sub _ponder_paragraph_buffer {
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       $para->[0] =~ s/^[~=]//s;
 
-      DEBUG and print "\n", Pod::Simple::BlackBox::pretty($para), "\n";
+      DEBUG() and print "\n", Pod::Simple::BlackBox::pretty($para), "\n";
 
       # traverse the treelet (which might well be just one string scalar)
       $self->{'content_seen'} ||= 1;
