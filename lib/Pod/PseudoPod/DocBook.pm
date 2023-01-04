@@ -699,9 +699,11 @@ sub make_ellipses
 	}
 
 BEGIN {
-require Pod::Simple::BlackBox;
+use Pod::Simple::BlackBox;
 
 package Pod::Simple::BlackBox;
+
+no warnings qw(redefine);
 
 sub _ponder_Verbatim {
 	my ($self,$para) = @_;
