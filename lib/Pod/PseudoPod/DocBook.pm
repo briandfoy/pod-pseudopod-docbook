@@ -5,7 +5,7 @@ use base 'Pod::PseudoPod';
 use warnings;
 no warnings;
 
-use subs qw();
+use subs qw(DEBUG);
 
 use Carp;
 
@@ -707,7 +707,7 @@ no warnings qw(redefine);
 
 sub _ponder_Verbatim {
 	my ($self,$para) = @_;
-	DEBUG and print STDERR " giving verbatim treatment...\n";
+	DEBUG() and print STDERR " giving verbatim treatment...\n";
 
 	$para->[1]{'xml:space'} = 'preserve';
 	foreach my $line ( @$para[ 2 .. $#$para ] ) {
@@ -850,7 +850,7 @@ sub _ponder_paragraph_buffer {
   return unless @{$paras = $self->{'paras'}};
   my $curr_open = ($self->{'curr_open'} ||= []);
 
-  DEBUG > 10 and print "# Paragraph buffer: <<", pretty($paras), ">>\n";
+  DEBUG() > 10 and print "# Paragraph buffer: <<", pretty($paras), ">>\n";
 
   # We have something in our buffer.  So apparently the document has started.
   unless($self->{'doc_has_started'}) {
@@ -864,7 +864,7 @@ sub _ponder_paragraph_buffer {
         # i.e., if the paras is all ~ends
      )
     ;
-    DEBUG and print "# Starting ",
+    DEBUG() and print "# Starting ",
       $starting_contentless ? 'contentless' : 'contentful',
       " document\n"
     ;
@@ -895,7 +895,7 @@ sub _ponder_paragraph_buffer {
     $para = shift @$paras;
     $para_type = $para->[0];
 
-    DEBUG > 1 and print "Pondering a $para_type paragraph, given the stack: (",
+    DEBUG() > 1 and print "Pondering a $para_type paragraph, given the stack: (",
       $self->_dump_curr_open(), ")\n";
 
     if($para_type eq '=for') {
@@ -912,7 +912,7 @@ sub _ponder_paragraph_buffer {
     # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     #~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     if(grep $_->[1]{'~ignore'}, @$curr_open) {
-      DEBUG > 1 and
+      DEBUG() > 1 and
        print "Skipping $para_type paragraph because in ignore mode.\n";
       next;
     }
@@ -941,7 +941,7 @@ sub _ponder_paragraph_buffer {
       #  mean how it should get treated, not as what the element name
       #  should be.
 
-      DEBUG > 1 and print "Pondering non-magical $para_type\n";
+      DEBUG() > 1 and print "Pondering non-magical $para_type\n";
 
       # In tables, the start of a headrow or bodyrow also terminates an
       # existing open row.
@@ -955,7 +955,7 @@ sub _ponder_paragraph_buffer {
          and @$curr_open
          and $curr_open->[-1][0] eq '=over'
       ) {
-        DEBUG > 2 and print "'=$para_type' inside an '=over'!\n";
+        DEBUG() > 2 and print "'=$para_type' inside an '=over'!\n";
         $self->whine(
           $para->[1]{'start_line'},
           "You forgot a '=back' before '$para_type'"
@@ -991,10 +991,10 @@ sub _ponder_paragraph_buffer {
       } elsif( $para_type =~ s/^=//s
         and defined( $para_type = $self->{'accept_directives'}{$para_type} )
       ) {
-        DEBUG > 1 and print " Pondering known directive ${$para}[0] as $para_type\n";
+        DEBUG() > 1 and print " Pondering known directive ${$para}[0] as $para_type\n";
       } else {
         # An unknown directive!
-        DEBUG > 1 and printf "Unhandled directive %s (Handled: %s)\n",
+        DEBUG() > 1 and printf "Unhandled directive %s (Handled: %s)\n",
          $para->[0], join(' ', sort keys %{$self->{'accept_directives'}} )
         ;
         $self->whine(
@@ -1008,14 +1008,14 @@ sub _ponder_paragraph_buffer {
 
       if($para_type =~ s/^\?//s) {
         if(! @$curr_open) {  # usual case
-          DEBUG and print "Treating $para_type paragraph as such because stack is empty.\n";
+          DEBUG() and print "Treating $para_type paragraph as such because stack is empty.\n";
         } else {
           my @fors = grep $_->[0] eq '=for', @$curr_open;
-          DEBUG > 1 and print "Containing fors: ",
+          DEBUG() > 1 and print "Containing fors: ",
             join(',', map $_->[1]{'target'}, @fors), "\n";
 
           if(! @fors) {
-            DEBUG and print "Treating $para_type paragraph as such because stack has no =for's\n";
+            DEBUG() and print "Treating $para_type paragraph as such because stack has no =for's\n";
 
           #} elsif(grep $_->[1]{'~resolve'}, @fors) {
           #} elsif(not grep !$_->[1]{'~resolve'}, @fors) {
@@ -1023,14 +1023,14 @@ sub _ponder_paragraph_buffer {
             # Look to the immediately containing for
 
             if($para_type eq 'Data') {
-              DEBUG and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+              DEBUG() and print "Treating Data paragraph as Plain/Verbatim because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
               $para->[0] = 'Para';
               $para_type = 'Plain';
             } else {
-              DEBUG and print "Treating $para_type paragraph as such because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
+              DEBUG() and print "Treating $para_type paragraph as such because the containing =for ($fors[-1][1]{'target'}) is a resolver\n";
             }
           } else {
-            DEBUG and print "Treating $para_type paragraph as Data because the containing =for ($fors[-1][1]{'target'}) is a non-resolver\n";
+            DEBUG() and print "Treating $para_type paragraph as Data because the containing =for ($fors[-1][1]{'target'}) is a non-resolver\n";
             $para->[0] = $para_type = 'Data';
           }
         }
@@ -1051,7 +1051,7 @@ sub _ponder_paragraph_buffer {
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       $para->[0] =~ s/^[~=]//s;
 
-      DEBUG and print "\n", Pod::Simple::BlackBox::pretty($para), "\n";
+      DEBUG() and print "\n", Pod::Simple::BlackBox::pretty($para), "\n";
 
       # traverse the treelet (which might well be just one string scalar)
       $self->{'content_seen'} ||= 1;
