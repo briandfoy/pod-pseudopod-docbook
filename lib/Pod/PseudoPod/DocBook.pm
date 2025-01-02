@@ -9,7 +9,7 @@ use subs qw(DEBUG);
 
 use Carp;
 
-our $VERSION = '0.101';
+our $VERSION = '0.102';
 
 sub DEBUG () { 0 }
 
