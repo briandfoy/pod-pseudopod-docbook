@@ -1,5 +1,8 @@
 Revision history for Perl module Pod::Pseudopod::DocBook
 
+0.191 2025-01-03T03:50:22Z
+	* refresh distro, update email address for maintainer
+
 0.101 2018-06-22T15:13:49Z
 	* Clarify that it's the Artistic License 2.0
 
